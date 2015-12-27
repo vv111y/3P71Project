@@ -88,6 +88,7 @@ public class UCI {
 		
 	}
 
+	// This method changes the options available for the engine.
 	private void setOptions(String inputString) {
 		// TODO Auto-generated method stub
 		
