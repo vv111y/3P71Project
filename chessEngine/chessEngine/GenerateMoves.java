@@ -1,7 +1,7 @@
 package chessEngine;
 
 //TODO re-analyze pawn movements, might be able to make generic function to handle while loops
-//TODO castling
+//TODO castling, requires booleans which are updated by move maker when castling is no longer poss
 
 /*
  * Class generates all possible moves for a player. Bitboard masks are used to
@@ -475,6 +475,33 @@ public class GenerateMoves {
     		 nextMove = moves & ~(moves - 1); // grab next move
     	 }
 
+    	 return moveList;
+     }
+     
+     /*
+      *  Castling
+      *  Takes boolean flag for white or black player, rook bitboard, and
+      *  boolean flags to determine is castling is still possible
+      *   
+      */
+     public String cMoves(boolean player, long rooks, boolean kSide, boolean qSide) {
+    	 //TODO test castle Moves
+    	 String moveList = ""; // concatenated list of all possible moves as x1y1x2y2
+    	 if (player == false) { // white player
+    		 if (kSide && ((occupied & ((1L << 61) | (1L << 62))) == 0)) { // check king side castling enabled and path clear
+    			 moveList += "7476";
+    		 }
+    		 if (qSide && ((occupied & ((1L << 57) | (1L << 58) | (1L << 59))) == 0)) { // check queen side castling enabled and path clear
+    			 moveList += "7472";
+    		 }
+    	 } else { // black player
+    		 if (kSide && ((occupied & ((1L << 5) | (1L << 6))) == 0)) { // check king side castling enabled and path clear
+    			 moveList += "0406";
+    		 }
+    		 if (qSide && ((occupied & ((1L << 1) | (1L << 2) | (1L << 3))) == 0)) { // check queen side castling enabled and path clear
+    			 moveList += "0402";
+    		 }
+    	 }
     	 return moveList;
      }
      
