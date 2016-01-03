@@ -29,7 +29,7 @@ public class BoardGen {
 				{" "," "," "," "," "," "," "," "},
 				{"wR","wN","wB","wQ","wK","wB","wN","wR"},
 				{"wP","wP","wP","wP","wP","wP","wP","wP"}
-        };
+		};
 		
 		arrayToBB(board);
 		
