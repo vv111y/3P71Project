@@ -17,7 +17,7 @@ public class BoardGen {
 	long bP = 0L, bN = 0L, bB = 0L, bR = 0L, bQ = 0L, bK = 0L; // black
 
 	public void initStdGame() {
-		// TODO: test harness
+		// TODO: test initStdGame
 		// initiates a standard board setup for a new game	
 		
 		String board[][] = {
@@ -36,13 +36,13 @@ public class BoardGen {
 	} // initStdGame()
 	
 	public void initUserBoard(String board[][]) {
-		// TODO: test harness
+		// TODO: test initUserBoard
 		// initiates a board setup based on user input
 		arrayToBB(board);
 	}
 	
 	public void arrayToBB(String[][] board) {
-		// TODO: test harness
+		// TODO: test arrayToBB
 		// converts string array to bitboard
 		String bitboard;
 		for (int i = 0; i < 64; i++) { // loop through each char in string array
@@ -93,7 +93,7 @@ public class BoardGen {
 	}
 	
 	public long parseString(String bitboard) {
-		// TODO: test harness
+		// TODO: test parseString
 		// parses a char string and returns a binary string
 		if (bitboard.charAt(0) == '0') { // simple parse
 			return Long.parseLong(bitboard, 2);

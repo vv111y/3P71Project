@@ -1,6 +1,7 @@
 package chessEngine;
 
 //TODO re-analyze pawn movements, might be able to make generic function to handle while loops
+//TODO castling
 
 /*
  * Class generates all possible moves for a player. Bitboard masks are used to
@@ -14,6 +15,8 @@ package chessEngine;
  */
 
 public class GenerateMoves {
+	
+	// MASKS
 	long fileA=72340172838076673L; // prevent bad pawn moves
     long fileH=-9187201950435737472L; // prevent bad pawn moves
     long filesAB=217020518514230019L; // prevent bad knight moves
@@ -22,13 +25,8 @@ public class GenerateMoves {
     long rank8=255L; // used for pawn promotion
     long rank4=1095216660480L; // used for en passant
     long rank5=4278190080L; // used for en passant
-    long occupied; // holds all occupied locations
-    long empty; // holds all empty locations on board
-    long whiteCaptures; // locations of bP, bN, bB, bR, bQ
-    long blackCaptures; // locations of wP, wN, wB, wR, wQ
-    long whiteNoCapture; // locations of wP, wN, wB, wR, wQ, wK, bK
-    long blackNoCapture; // locations of bP, bN, bB, bR, bQ, bK, wK
-    long enpassant; // holds location of possible en passant
+    long kingSpan = 460039L;
+    long knightSpan = 43234889994L;
     long rankMasks[] = { 
     		0xFFL, 0xFF00L, 0xFF0000L, 0xFF000000L, 0xFF00000000L, 
     		0xFF0000000000L, 0xFF000000000000L, 0xFF00000000000000L
@@ -48,45 +46,62 @@ public class GenerateMoves {
     		 0x804020100000000L, 0x402010000000000L, 0x201000000000000L, 0x100000000000000L
      }; //masks for all anti-diagonals used for sliding piece moves (ordered: from top right to bottom left)
      
-     
+    // GAME STATE
+    long occupied; // holds all occupied locations
+    long empty; // holds all empty locations on board
+    long whiteCaptures; // locations of bP, bN, bB, bR, bQ
+    long blackCaptures; // locations of wP, wN, wB, wR, wQ
+    long whiteCanGo; // locations clear of wP, wN, wB, wR, wQ, wK, bK
+    long blackCanGo; // locations clear of bP, bN, bB, bR, bQ, bK, wK
+    long enpassant; // holds location of possible en passant
+    //TODO enpassant board must be set and cleared by move maker
+    
+    /*
+     * Player Moves
+     */
+    
      public String whiteMoves(long wP, long wN, long wB, long wR, long wQ, long wK, long bP, long bN, long bB, long bR, long bQ, long bK) {
-    	 //TODO needs testing
-    	 // wpMoves() + rankMoves() + fileMoves() + diagonalMoves() + antidiagonalMoves()
+    	 //TODO test whiteMoves
+    	 // wpMoves() + nMoves() + bMoves() + rMoves() + qMoves() + kMoves()
     	 String moveList; // concatenated list of all possible moves
     	 
     	 occupied = (wP | wN | wB | wR | wQ | wK | bP | bN | bB | bR | bQ | bK);
     	 empty = ~occupied;
-    	 whiteNoCapture = ~(wP | wN | wB | wR | wQ | wK | bK);
+    	 whiteCanGo = ~(wP | wN | wB | wR | wQ | wK | bK);
     	 whiteCaptures = (bP | bN | bB | bR | bQ);
-    	 moveList = wpMoves()
-    			 + rankMoves() 
-    			 + fileMoves() 
-    			 + diagonalMoves() 
-    			 + antidiagonalMoves();
-    	 
+    	 moveList = wpMoves(wP, bP)
+    			 + bMoves(wN, whiteCanGo) 
+    			 + rMoves(wR, whiteCanGo) 
+    			 + qMoves(wQ, whiteCanGo)
+    			 + nMoves(wN, whiteCanGo)
+    			 + kMoves(wK, whiteCanGo);
     	 return moveList;
      }
      
      public String blackMoves(long wP, long wN, long wB, long wR, long wQ, long wK, long bP, long bN, long bB, long bR, long bQ, long bK) {
-    	 //TODO needs testing
+    	 //TODO test blackMoves
     	 // bpMoves() + rankMoves() + fileMoves() + diagonalMoves() + antidiagonalMoves()
     	 String moveList; // concatenated list of all possible moves as x1y1x2y2
 
     	 occupied = (wP | wN | wB | wR | wQ | wK | bP | bN | bB | bR | bQ | bK);
     	 empty = ~occupied;
-    	 blackNoCapture = ~(bP | bN | bB | bR | bQ | bK | wK);
+    	 blackCanGo = ~(bP | bN | bB | bR | bQ | bK | wK);
     	 blackCaptures = (wP | wN | wB | wR | wQ);
-    	 moveList = bpMoves()
-    			 + rankMoves() 
-    			 + fileMoves() 
-    			 + diagonalMoves() 
-    			 + antidiagonalMoves();
-    	 
+    	 moveList = bpMoves(bP, wP)
+    			 + bMoves(bN, blackCanGo) 
+    			 + rMoves(bR, blackCanGo) 
+    			 + qMoves(bQ, blackCanGo)
+    			 + nMoves(bN, blackCanGo)
+    			 + kMoves(bK, blackCanGo);
     	 return moveList;
      }
      
-     public void wpMoves(long wP, long bP) {
-    	 //TODO needs testing
+     /*
+      * Pawns
+      */
+     // white pawns
+     public String wpMoves(long wP, long bP) {
+    	 //TODO test wpMoves
     	 // all moves for white pawns
     	 String moveList = ""; // concatenated list of all possible moves as x1y1x2y2
     	 long pawnMoves; // bitboard for pawn destinations
@@ -165,7 +180,7 @@ public class GenerateMoves {
         	 moveList += (index % 8 - 1) + (index % 8) + "QP" // promotion to queen
             		 + (index % 8 - 1) + (index % 8) + "RP" // promotion to rook
             		 + (index % 8 - 1) + (index % 8) + "BP" // promotion to bishop
-            		 + (index % 8 - 1) + (index  %8) + "NP"; // no promotion
+            		 + (index % 8 - 1) + (index % 8) + "NP"; // no promotion
         	 pawnMoves &= ~nextMove; // remove added move from list of remaining possibilities
         	 nextMove = pawnMoves & ~(pawnMoves - 1); // remove all moves but one
          }
@@ -178,7 +193,7 @@ public class GenerateMoves {
         	 moveList += (index % 8 + 1) + (index % 8) + "QP" // promotion to queen
             		 + (index % 8 + 1) + (index % 8) + "RP" // promotion to rook
             		 + (index % 8 + 1) + (index % 8) + "BP" // promotion to bishop
-            		 + (index % 8 + 1) + (index  %8) + "NP"; // no promotion
+            		 + (index % 8 + 1) + (index % 8) + "NP"; // no promotion
         	 pawnMoves &= ~nextMove; // remove added move from list of remaining possibilities
         	 nextMove = pawnMoves & ~(pawnMoves - 1); // remove all moves but one
          }
@@ -198,10 +213,13 @@ public class GenerateMoves {
         	 int index = Long.numberOfTrailingZeros(nextMove); // get position of destination
         	 moveList += (index % 8 + 1) + (index  % 8) + "E";
          }
+         
+         return moveList;
      }
      
-     public void bpMoves(long bP, long wP) {
-    	 //TODO needs testing
+     // black pawns
+     public String bpMoves(long bP, long wP) {
+    	 //TODO test bpMoves
     	 // all moves for black pawns
     	 String moveList = ""; // concatenated list of all possible moves as x1y1x2y2
     	 long pawnMoves; // bitboard for pawn destinations
@@ -266,7 +284,7 @@ public class GenerateMoves {
              moveList += (index % 8) + (index % 8) + "QP" // promotion to queen
             		 + (index % 8) + (index % 8) + "RP" // promotion to rook
             		 + (index % 8) + (index % 8) + "BP" // promotion to bishop
-            		 + (index % 8) + (index  %8) + "NP"; // no promotion
+            		 + (index % 8) + (index % 8) + "NP"; // no promotion
              pawnMoves &= ~nextMove; // remove added move from list of remaining possibilities
         	 nextMove = pawnMoves & ~(pawnMoves - 1); // remove all moves but one
          }
@@ -279,7 +297,7 @@ public class GenerateMoves {
         	 moveList += (index % 8 + 1) + (index % 8) + "QP" // promotion to queen
             		 + (index % 8 + 1) + (index % 8) + "RP" // promotion to rook
             		 + (index % 8 + 1) + (index % 8) + "BP" // promotion to bishop
-            		 + (index % 8 + 1) + (index  %8) + "NP"; // no promotion
+            		 + (index % 8 + 1) + (index % 8) + "NP"; // no promotion
         	 pawnMoves &= ~nextMove; // remove added move from list of remaining possibilities
         	 nextMove = pawnMoves & ~(pawnMoves - 1); // remove all moves but one
          }
@@ -312,25 +330,257 @@ public class GenerateMoves {
         	 int index = Long.numberOfTrailingZeros(nextMove); // get position of destination
         	 moveList += (index % 8 - 1) + (index  % 8) + "E";
          }
+         
+         return moveList;
      }
      
-     public void rankMoves() {
-    	 //TODO code and test
-    	 // all sliding piece moves within rank
+     /*
+      * Sliding Pieces
+      */
+     
+     // bishops
+     // takes (white|black)bishop bitboard as well as (white|black)NoCaptures
+     public String bMoves(long bishops, long canGo) {
+    	//TODO test bMoves
+    	 // all bishop moves
+    	 String moveList = ""; // concatenated list of all possible moves as x1y1x2y2
+    	 long nextBishop = bishops & ~(bishops - 1); // grab location of first knight
+    	 long moves;
+    	 while (nextBishop != 0) {
+    		 int bishopPosition = Long.numberOfTrailingZeros(nextBishop); // get position of current bishop
+    		 moves = diagonalMoves(bishopPosition) & canGo; // get diagonal moves
+    		 long nextMove = moves & ~(moves - 1); // grab first available move
+    		 while (nextMove != 0) {
+    			 int index = Long.numberOfTrailingZeros(nextMove); // get position of next destination
+    			 moveList += (bishopPosition / 8) + (bishopPosition % 8) + (index / 8) + (index % 8);
+    			 moves &= ~nextMove; // remove current move from list
+    			 nextMove = moves & ~(moves - 1); // grab next move
+    		 }
+    		 bishops &= ~nextMove; // remove current bishop from list
+    		 nextBishop = bishops & ~(bishops - 1); // grab next bishop
+    	 }
+    	 return moveList;
      }
      
-     public void fileMoves() {
-    	 //TODO code and test
-    	 // all sliding piece moves within file
+     // rooks
+     // takes (white|black)rooks bitboard as well as (white|black)NoCaptures
+     public String rMoves(long rooks, long canGo) {
+    	//TODO test rMoves
+    	 // all bishop moves
+    	 String moveList = ""; // concatenated list of all possible moves as x1y1x2y2
+    	 long nextRook = rooks & ~(rooks - 1); // grab location of first knight
+    	 long moves;
+    	 while (nextRook != 0) {
+    		 int rookPosition = Long.numberOfTrailingZeros(nextRook); // get position of current bishop
+    		 moves = rfMoves(rookPosition) & canGo; // get rank and file moves
+    		 long nextMove = moves & ~(moves - 1); // grab first available move
+    		 while (nextMove != 0) {
+    			 int index = Long.numberOfTrailingZeros(nextMove); // get position of next destination
+    			 moveList += (rookPosition / 8) + (rookPosition % 8) + (index / 8) + (index % 8);
+    			 moves &= ~nextMove; // remove current move from list
+    			 nextMove = moves & ~(moves - 1); // grab next move
+    		 }
+    		 rooks &= ~nextMove; // remove current bishop from list
+    		 nextRook = rooks & ~(rooks - 1); // grab next bishop
+    	 }
+    	 return moveList;
      }
      
-     public void diagonalMoves() {
-    	 // TODO code and test
-    	 // all sliding piece moves along diagonal
+     // queens
+     // takes (white|black)queens bitboard as well as (white|black)NoCaptures
+     public String qMoves(long queens, long canGo) {
+    	 //TODO test qMoves
+    	 // all queen moves
+    	 String moveList = ""; // concatenated list of all possible moves as x1y1x2y2
+    	 long nextQueen = queens & ~(queens - 1); // grab location of first knight
+    	 long moves;
+    	 while (nextQueen != 0) {
+    		 int queenPosition = Long.numberOfTrailingZeros(nextQueen); // get position of current bishop
+    		 moves = diagonalMoves(queenPosition) & canGo; // get diagonal moves
+    		 moves += rfMoves(queenPosition) & canGo; // get rank and file moves
+    		 long nextMove = moves & ~(moves - 1); // grab first available move
+    		 while (nextMove != 0) {
+    			 int index = Long.numberOfTrailingZeros(nextMove); // get position of next destination
+    			 moveList += (queenPosition / 8) + (queenPosition % 8) + (index / 8) + (index % 8);
+    			 moves &= ~nextMove; // remove current move from list
+    			 nextMove = moves & ~(moves - 1); // grab next move
+    		 }
+    		 queens &= ~nextMove; // remove current bishop from list
+    		 nextQueen = queens & ~(queens - 1); // grab next bishop
+    	 }
+    	 return moveList;
+    	 
      }
      
-     public void antiDiagonalMoves() {
-    	 // TODO code and test
-    	 // all sliding piece moves along anti-diagonal
+     /*
+      * Other pieces
+      */
+     // knights
+     public String nMoves(long knights, long canGo) {
+    	 //TODO test nMoves
+    	 // all knight moves
+    	 String moveList = ""; // concatenated list of all possible moves as x1y1x2y2
+    	 long nextKnight = knights & ~(knights - 1); // grab location of first knight
+    	 long moves;
+    	 while (nextKnight != 0) {
+    		 int knightPosition = Long.numberOfTrailingZeros(nextKnight); // get position of current bishop
+    		 if (knightPosition > 18) {
+        		 moves = knightSpan << (knightPosition - 18);
+    		 } else {
+    			 moves = knightSpan >> (18 - knightPosition);
+    		 }
+    		 if (knightPosition % 8 < 4) {
+                 moves &= (~filesGH & canGo);
+             }
+             else {
+                 moves &= (~filesAB & canGo);
+             }
+    		 long nextMove = moves & ~(moves - 1); // grab first available move
+    		 while (nextMove != 0) {
+    			 int index = Long.numberOfTrailingZeros(nextMove); // get position of next destination
+    			 moveList += (knightPosition / 8) + (knightPosition % 8) + (index / 8) + (index % 8);
+    			 moves &= ~nextMove; // remove current move from list
+    			 nextMove = moves & ~(moves - 1); // grab next move
+    		 }
+    		 knights &= ~nextMove; // remove current bishop from list
+    		 nextKnight = knights & ~(knights - 1); // grab next bishop
+    	 }
+    	 return moveList;
      }
+     
+     // kings
+     public String kMoves(long king, long canGo) {
+    	 //TODO test kMoves
+    	 // all king moves
+    	 String moveList = ""; // concatenated list of all possible moves as x1y1x2y2
+    	 long moves;
+    	 int kingPosition = Long.numberOfTrailingZeros(king); // get position of current bishop
+    	 
+    	 if (kingPosition > 9) {
+    		 moves = knightSpan << (kingPosition - 9);
+    	 } else {
+    		 moves = knightSpan >> (9 - kingPosition);
+    	 }
+    	 if (kingPosition % 8 < 4) {
+    		 moves &= (~filesGH & canGo);
+    	 }
+    	 else {
+    		 moves &= (~filesAB & canGo);
+    	 }
+    	 long nextMove = moves & ~(moves - 1); // grab first available move
+    	 while (nextMove != 0) {
+    		 int index = Long.numberOfTrailingZeros(nextMove); // get position of next destination
+    		 moveList += (kingPosition / 8) + (kingPosition % 8) + (index / 8) + (index % 8);
+    		 moves &= ~nextMove; // remove current move from list
+    		 nextMove = moves & ~(moves - 1); // grab next move
+    	 }
+
+    	 return moveList;
+     }
+     
+     /*
+      * Movements for sliding piece
+      */
+     
+     // rank and file slides, takes integer position
+     public long rfMoves(int position) {
+    	 //TODO test rfMoves
+    	 // all sliding piece moves along ranks and files
+    	 long bitPos = 1L << position; // create bitstring of 1 and shift it to proper position
+         long possRanks = (occupied - 2 * bitPos) ^ Long.reverse(Long.reverse(occupied) - 2 * Long.reverse(bitPos));
+         long possFiles = ((occupied & fileMasks[position % 8]) - (2 * bitPos)) ^ Long.reverse(Long.reverse(occupied & fileMasks[position % 8]) - (2 * Long.reverse(bitPos)));
+         return (possRanks & rankMasks[position / 8]) | (possFiles & fileMasks[position % 8]);
+     }
+     
+     // diagonal and anti-diagonal slides
+     public long diagonalMoves(int position) {
+    	 // TODO test diagonalMoves
+    	 // all sliding piece moves along diagonal and anti-diagonals
+    	 long bitPos = 1L << position; // create bitstring of 1 and shift it to proper position
+         long possDiagonal = ((occupied & diagonalMasks[(position / 8) + (position % 8)]) - (2 * bitPos)) ^ Long.reverse(Long.reverse(occupied & diagonalMasks[(position / 8) + (position % 8)]) - (2 * Long.reverse(bitPos)));
+         long possAntiDiagonal = ((occupied&antiDiagonalMasks[(position / 8) + 7 - (position % 8)]) - (2 * bitPos)) ^ Long.reverse(Long.reverse(occupied & antiDiagonalMasks[(position / 8) + 7 - (position % 8)]) - (2 * Long.reverse(bitPos)));
+         return (possDiagonal & diagonalMasks[(position / 8) + (position % 8)]) | (possAntiDiagonal & antiDiagonalMasks[(position / 8) + 7 - (position % 8)]);
+     }
+     
+     /*
+      * Unsafe positions
+      * Determines all the positions which the opponent can move to
+      * Takes boolean flag to label player for pawn shifts as well as
+      * all opponent piece position bitboards
+      */
+     public long unsafe(boolean player, long oppP, long oppN, long oppB, long oppR, long oppQ, long oppK) {
+    	 // TODO test unsafe
+    	 long unsafe; // all unsafe positions for player
+         long possMoves; // all possible opponents moves
+         
+         // attacks from pawns differ depending on player
+         if (player = true) { // true = black
+        	 unsafe = ((oppP >> 7) & ~fileA); //pawn capture right
+        	 unsafe |= ((oppP >> 9) & ~fileH);//pawn capture left
+         } else {
+        	 unsafe = ((oppP << 7) & ~fileA); //pawn capture left
+        	 unsafe |= ((oppP << 9) & ~fileH);//pawn capture right
+         }
+         
+         // attacks from knight
+         long nextPiece = oppN & ~(oppN - 1);
+         while(nextPiece != 0) {
+        	 int knightPosition = Long.numberOfTrailingZeros(nextPiece);
+        	 
+        	 if (knightPosition > 18) {
+        		 possMoves = knightSpan << (knightPosition - 18);
+        	 } else {
+        		 possMoves = knightSpan >> (18 - knightPosition);
+        	 }
+        	 
+        	 if (knightPosition % 8 < 4) {
+        		 possMoves &= ~filesGH;
+        	 } else {
+        		 possMoves &= ~filesAB;
+        	 }
+        	 
+        	 unsafe |= possMoves;
+        	 oppN &= ~nextPiece;
+        	 nextPiece = oppN & ~(nextPiece - 1);
+         }
+         
+         // attacks from bishops and diagonal queens
+         long oppQB = oppQ | oppB;
+         nextPiece = oppQB & ~(oppQB - 1);
+         while (nextPiece != 0) {
+             int qbPosition=Long.numberOfTrailingZeros(nextPiece);
+             possMoves = diagonalMoves(qbPosition);
+             unsafe |= possMoves;
+             oppQB &= ~nextPiece;
+             nextPiece = oppQB & ~(oppQB-1);
+         }
+         
+         // attacks from rooks and rank/file queens
+         long oppQR = oppQ | oppR;
+         nextPiece = oppQR & ~(oppQR-1);
+         while(nextPiece != 0) {
+             int qrPosition=Long.numberOfTrailingZeros(nextPiece);
+             possMoves=rfMoves(qrPosition);
+             unsafe |= possMoves;
+             oppQR &= ~nextPiece;
+             nextPiece = oppQR & ~(oppQR-1);
+         }
+         
+         // attacks from king
+         int kPosition = Long.numberOfTrailingZeros(oppK);
+         if (kPosition > 9) {
+             possMoves = kingSpan << (kPosition - 9);
+         } else {
+             possMoves = kingSpan >> (9 - kPosition);
+         }
+         if (kPosition % 8 < 4) {
+             possMoves &= ~filesGH;
+         }
+         else {
+             possMoves &= ~filesAB;
+         }
+         unsafe |= possMoves;
+         return unsafe;
+     }
+     
 }
