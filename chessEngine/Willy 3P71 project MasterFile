@@ -1,0 +1,218 @@
+3P71 PROJECT MASTER
+
+TODO
+	
+	Willy:
+	class Player
+		go searchmoves ok?
+		parse move 
+			position x x move xxxx xxxx xxxx 
+			move in 'go' too. 
+			need to change board
+		fenparse - fenparts 4 enpassant
+		debug 
+
+
+
+	class Thinker
+		understand threading , interrupt 
+		output info command?
+		uci bestmove
+			the engine has stopped searching and found the move <move> best in this position. the engine can send the move it likes to ponder on. The engine must not start pondering automatically.
+			this command must always be sent if the engine stops searching, also in pondering mode if there is a "stop" command, so for every "go" command a "bestmove" command is needed!
+			Directly before that the engine should send a final "info" command with the final search information, the the GUI has the complete statistics about the last search.
+
+	class game?
+		General
+			current board
+			make moves, reset 
+			timers, 
+			move history
+			turn, mate, checkmate, draw
+			removed pieces, moving rights/allowed
+		from go
+			winc, binc, movestogo, 
+		from position
+			startpos -> reset board @ currentGame state, maybe reset game
+			fen does board and currentGame state
+			moves -> currentGame state
+		from newgame - reset whole thing
+
+
+	class command?
+		from go
+			searchmoves, ponder, movestogo
+			depth, nodes, mate (search for), movetime, infinite
+		from position, newgame 
+			change game state -- thinker needs to know
+		from debug, setoption 
+			change thinker, needs to know too
+		ponderhit
+		stop
+
+
+	ACTIONS
+		Game Events
+			move, capture - removed piece, other adjustments?, piece count, 
+
+	HOLD
+		position
+			^^ board [parse fen]
+			^^ board [makeMove()]
+		newgame
+			^^ rest [reset all] 
+		setOptions?
+			^^ parse rest of line
+
+	DEBUG
+		threading: uci isReady, etc
+		perft
+		games
+		elo estimate http://chess.stackexchange.com/questions/12790/how-to-measure-strength-of-my-own-chess-engine
+
+
+DONE
+	UCI commands
+		go
+			parse rest of line 
+			infinite - no limit, must go till gets stop command
+			depth n - go till certain plyCount
+			movetime - search exactly x milliseconds
+			subs
+				searchmoves <move1> .... <movei>
+				ponder 
+				wtime <x> btime <x> winc <x> binc <x> 
+				movestogo <x> depth <x> nodes <x> mate <x> movetime <x>  infinite
+		position	
+			parse startpos
+		stop
+		uci
+		isReady
+			check searcher thread if idle
+			only checks once right away. may need wait
+			thinker needs to go to wait state when ready
+		ucinewgame
+		quit
+
+	Thinker
+		terminate should be ok
+		system.out - does it already
+
+	breakdown prob,
+		names, interface
+		breakdown jobs
+			setup deadlines
+
+
+NOTES
+	Rank = row, File = column
+	UCI
+		use java scanner for input 
+		[see http://stackoverflow.com/questions/17637032/bufferedreader-vs-console-vs-scanner ; and further links]
+
+	Thread
+		threading best way to handle accepting UCI input while engine is working
+		join only for terminating thread
+		wait vs sleep vs 
+
+
+	Launch4j - wraps .jar file into .exe to use with any app
+
+	INSTALLS
+		Scid vs Mac
+		ICC for Mac
+		Xboard & engines
+		Arena
+		Stockfish engine & repos
+		AC2 example from logicCrazy
+
+-------
+logic crazy adv
+	bitboard
+	iterative deepening
+	alpha-beta
+	transposition tables
+	(aspiration windows)
+	NO
+		(threads)
+		(principal variation search)
+		(advanced theoretical evaluation)
+
+CODE SNIP
+		// test if Thinker is doing anything		
+		while (!thinker.cortexReady) {
+			try {
+				thinker.cortex.wait();
+			} catch (InterruptedException e) {}			
+		}
+
+----------
+Required
+
+system requirements are as follows:
+	The program should respect the rules of chess, for example,
+		the movement of pieces (including castling and en passant), § piece promotion, check
+		checkmate
+		stalemate
+		Please obtain a book on chess to verify your understanding of the game!
+
+	The program must use a game tree search scheme with alpha-beta pruning. Furthermore, the program should permit user-supplied control parameters, for example, the depth of search.
+
+	Put effort towards designing an effective board evaluation function. You should research the literature on computer chess to find strategies used by other systems. You can borrow ideas from the literature (properly acknowledged in your report). I also encourage you to try your own ideas!
+
+	The program should interact with a human player. Moves should be given via board coordinates. At the minimum, the program should dump out the current board as an ASCII table (e.g., upper case = black, lower case = white, space = “- “,). Although a graphical user interface is not required, an effective GUI will be positively considered during evaluation.
+
+	Your program should permit any board setup to be used initially. (This is good for testing purposes)
+
+	dump out the game in terms of a standard chess output text file.
+
+	------
+
+TUT Nov20
+	CHESS PROJECT
+
+	include experiment protocols (same what I did in asgn2 parameter section)
+	Notification/warning if you are in check
+	4-ply minimum - MAJOR MARKS DO NOT SKIMP - turns should be around 15sec
+	have GUI
+	indicate whose turn it is
+	ability to restart game after losing
+	report which details your creative heuristic - GO IN DEPTH, MORE THE BETTER
+
+	ME
+		conditionals
+			what moves can be made testing
+			condition if in check
+			condition if can do special moves
+
+LEC Oct26,28
+
+----------
+REPORT
+	BODY
+		Computer Opponent
+			heuristics used
+			algorithm discussion
+
+		Implementation
+			platform
+			program design (how decomposed, think OO)
+			coding particulars
+			credit code reused, ideas and tutorials used
+
+
+
+
+	REFERENCES
+		Laws of Chess starting after July 1, 2014 https://www.fide.com/component/handbook/?id=171&view=article
+
+ARCHIVE
+	TODO
+		build engine
+		bitboards
+			generation 
+		move generation
+			eval legal rules of chess
+		node
+		tree - search & eval
+			score board state
