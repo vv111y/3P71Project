@@ -6,6 +6,8 @@ package chessEngine;
  * have option to take string array as input from user to permit any board 
  * initial setup.
  *  
+ *  Piece representation on board lower case are black piece and upper case are white pieces
+ *  
  * Based on Logic Crazy chess engine: https://www.youtube.com/channel/UCmMjMHTeUEBJJZhxix-N-yg
  */
 
@@ -18,17 +20,18 @@ public class BoardGen {
 
 	public void initStdGame() {
 		// TODO: test initStdGame
-		// initiates a standard board setup for a new game	
+		// initiates a standard board setup for a new game
+		// 
 		
 		String board[][] = {
-				{"bR","bN","bB","bQ","bK","bB","bN","bR"},
-				{"bP","bP","bP","bP","bP","bP","bP","bP"},
+				{"r","n","b","q","k","b","n","r"},
+				{"p","p","p","p","p","p","p","p"},
 				{" "," "," "," "," "," "," "," "},
 				{" "," "," "," "," "," "," "," "},
 				{" "," "," "," "," "," "," "," "},
 				{" "," "," "," "," "," "," "," "},
-				{"wR","wN","wB","wQ","wK","wB","wN","wR"},
-				{"wP","wP","wP","wP","wP","wP","wP","wP"}
+				{"P","P","P","P","P","P","P","P"},
+				{"R","N","B","Q","K","B","N","R"}
 		};
 		
 		arrayToBB(board);
@@ -36,6 +39,7 @@ public class BoardGen {
 	} // initStdGame()
 	
 	public void initUserBoard(String board[][]) {
+		// TODO: update initUserBoard to take FEN string
 		// TODO: test initUserBoard
 		// initiates a board setup based on user input
 		arrayToBB(board);
@@ -49,40 +53,40 @@ public class BoardGen {
 			bitboard = "0000000000000000000000000000000000000000000000000000000000000000"; // 64bit string
 			bitboard = bitboard.substring(i+1) + "1" + bitboard.substring(0, i);
 			switch (board[i/8][i%8]) { // look at chars at each position in board
-			case "bR": // black rooks
+			case "r": // black rooks
 				bR += parseString(bitboard);
 				break;
-			case "bN": // black knights
+			case "n": // black knights
 				bN += parseString(bitboard);
 				break;
-			case "bB": // black bishops
+			case "b": // black bishops
 				bB += parseString(bitboard);
 				break;
-			case "bQ": // black queens
+			case "q": // black queens
 				bQ += parseString(bitboard);
 				break;
-			case "bK": // black king
+			case "k": // black king
 				bK += parseString(bitboard);
 				break;
-			case "bP": // black pawns
+			case "p": // black pawns
 				bP += parseString(bitboard);
 				break;
-			case "wR": // white rooks
+			case "R": // white rooks
 				wR += parseString(bitboard);
 				break;
-			case "wN": // white knights
+			case "N": // white knights
 				wN += parseString(bitboard);
 				break;
-			case "wB": // white bishops
+			case "B": // white bishops
 				wB += parseString(bitboard);
 				break;
-			case "wQ": // white queens
+			case "Q": // white queens
 				wQ += parseString(bitboard);
 				break;
-			case "wK": // white king
+			case "K": // white king
 				wK += parseString(bitboard);
 				break;
-			case "wP": // white pawns
+			case "P": // white pawns
 				wP += parseString(bitboard);
 				break;
 			default:

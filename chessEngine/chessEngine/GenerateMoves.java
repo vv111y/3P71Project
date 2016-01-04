@@ -60,7 +60,7 @@ public class GenerateMoves {
      * Player Moves
      */
     
-     public String whiteMoves(long wP, long wN, long wB, long wR, long wQ, long wK, long bP, long bN, long bB, long bR, long bQ, long bK) {
+     public String whiteMoves(long wP, long wN, long wB, long wR, long wQ, long wK, long bP, long bN, long bB, long bR, long bQ, long bK, boolean kSide, boolean qSide) {
     	 //TODO test whiteMoves
     	 // wpMoves() + nMoves() + bMoves() + rMoves() + qMoves() + kMoves()
     	 String moveList; // concatenated list of all possible moves
@@ -74,11 +74,12 @@ public class GenerateMoves {
     			 + rMoves(wR, whiteCanGo) 
     			 + qMoves(wQ, whiteCanGo)
     			 + nMoves(wN, whiteCanGo)
-    			 + kMoves(wK, whiteCanGo);
+    			 + kMoves(wK, whiteCanGo)
+    			 + cMoves(false, wR, kSide, qSide);
     	 return moveList;
      }
      
-     public String blackMoves(long wP, long wN, long wB, long wR, long wQ, long wK, long bP, long bN, long bB, long bR, long bQ, long bK) {
+     public String blackMoves(long wP, long wN, long wB, long wR, long wQ, long wK, long bP, long bN, long bB, long bR, long bQ, long bK, boolean kSide, boolean qSide) {
     	 //TODO test blackMoves
     	 // bpMoves() + rankMoves() + fileMoves() + diagonalMoves() + antidiagonalMoves()
     	 String moveList; // concatenated list of all possible moves as x1y1x2y2
@@ -92,7 +93,8 @@ public class GenerateMoves {
     			 + rMoves(bR, blackCanGo) 
     			 + qMoves(bQ, blackCanGo)
     			 + nMoves(bN, blackCanGo)
-    			 + kMoves(bK, blackCanGo);
+    			 + kMoves(bK, blackCanGo)
+    			 + cMoves(true, bR, kSide, qSide);
     	 return moveList;
      }
      
@@ -205,13 +207,13 @@ public class GenerateMoves {
          pawnMoves = (wP << 1) & bP & rank5 & ~fileA & enpassant; // checks if enpassant is possible
          if (pawnMoves != 0) {
         	 int index = Long.numberOfTrailingZeros(nextMove); // get position of destination
-        	 moveList += (index % 8 - 1) + (index  % 8) + "E";
+        	 moveList += (index % 8 - 1) + (index  % 8) + "WE";
          }
          // right 
          pawnMoves = (wP >> 1) & bP & rank5 & ~fileH & enpassant; // checks if enpassant is possible
          if (pawnMoves != 0) {
         	 int index = Long.numberOfTrailingZeros(nextMove); // get position of destination
-        	 moveList += (index % 8 + 1) + (index  % 8) + "E";
+        	 moveList += (index % 8 + 1) + (index  % 8) + "WE";
          }
          
          return moveList;
@@ -281,10 +283,10 @@ public class GenerateMoves {
          nextMove = pawnMoves & ~(pawnMoves - 1); // grab next available destination
          while (nextMove != 0) {
         	 int index = Long.numberOfTrailingZeros(nextMove); // get position of first destination
-             moveList += (index % 8) + (index % 8) + "QP" // promotion to queen
-            		 + (index % 8) + (index % 8) + "RP" // promotion to rook
-            		 + (index % 8) + (index % 8) + "BP" // promotion to bishop
-            		 + (index % 8) + (index % 8) + "NP"; // no promotion
+             moveList += (index % 8) + (index % 8) + "qP" // promotion to queen
+            		 + (index % 8) + (index % 8) + "rP" // promotion to rook
+            		 + (index % 8) + (index % 8) + "bP" // promotion to bishop
+            		 + (index % 8) + (index % 8) + "nP"; // no promotion
              pawnMoves &= ~nextMove; // remove added move from list of remaining possibilities
         	 nextMove = pawnMoves & ~(pawnMoves - 1); // remove all moves but one
          }
@@ -294,10 +296,10 @@ public class GenerateMoves {
          nextMove = pawnMoves & ~(pawnMoves - 1); // grab next available destination
          while (nextMove != 0) {
         	 int index = Long.numberOfTrailingZeros(nextMove); // get position of first destination
-        	 moveList += (index % 8 + 1) + (index % 8) + "QP" // promotion to queen
-            		 + (index % 8 + 1) + (index % 8) + "RP" // promotion to rook
-            		 + (index % 8 + 1) + (index % 8) + "BP" // promotion to bishop
-            		 + (index % 8 + 1) + (index % 8) + "NP"; // no promotion
+        	 moveList += (index % 8 + 1) + (index % 8) + "qP" // promotion to queen
+            		 + (index % 8 + 1) + (index % 8) + "rP" // promotion to rook
+            		 + (index % 8 + 1) + (index % 8) + "bP" // promotion to bishop
+            		 + (index % 8 + 1) + (index % 8) + "nP"; // no promotion
         	 pawnMoves &= ~nextMove; // remove added move from list of remaining possibilities
         	 nextMove = pawnMoves & ~(pawnMoves - 1); // remove all moves but one
          }
@@ -307,10 +309,10 @@ public class GenerateMoves {
          nextMove = pawnMoves & ~(pawnMoves - 1); // grab next available destination
          while (nextMove != 0) {
         	 int index = Long.numberOfTrailingZeros(nextMove); // get position of first destination
-        	 moveList += (index % 8 - 1) + (index % 8) + "QP" // promotion to queen
-            		 + (index % 8 - 1) + (index % 8) + "RP" // promotion to rook
-            		 + (index % 8 - 1) + (index % 8) + "BP" // promotion to bishop
-            		 + (index % 8 - 1) + (index  %8) + "NP"; // no promotion
+        	 moveList += (index % 8 - 1) + (index % 8) + "qP" // promotion to queen
+            		 + (index % 8 - 1) + (index % 8) + "rP" // promotion to rook
+            		 + (index % 8 - 1) + (index % 8) + "bP" // promotion to bishop
+            		 + (index % 8 - 1) + (index  %8) + "nP"; // no promotion
         	 pawnMoves &= ~nextMove; // remove added move from list of remaining possibilities
         	 nextMove = pawnMoves & ~(pawnMoves - 1); // remove all moves but one
          }
@@ -322,13 +324,13 @@ public class GenerateMoves {
          pawnMoves = (wP >> 1) & wP & rank4 & ~fileH & enpassant; // checks if enpassant is possible
          if (pawnMoves != 0) {
         	 int index = Long.numberOfTrailingZeros(nextMove); // get position of destination
-        	 moveList += (index % 8 + 1) + (index  % 8) + "E";
+        	 moveList += (index % 8 + 1) + (index  % 8) + "BE";
          }
          // right 
          pawnMoves = (wP << 1) & wP & rank4 & ~fileA & enpassant; // checks if enpassant is possible
          if (pawnMoves != 0) {
         	 int index = Long.numberOfTrailingZeros(nextMove); // get position of destination
-        	 moveList += (index % 8 - 1) + (index  % 8) + "E";
+        	 moveList += (index % 8 - 1) + (index  % 8) + "BE";
          }
          
          return moveList;
