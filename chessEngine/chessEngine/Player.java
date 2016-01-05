@@ -277,6 +277,7 @@ public class Player {
 			case 'r':
 				// white rook
 				currentGame.currentBoard[rank][file] = "r";
+				
 				file++;
 				break;
 			case 'n':
@@ -392,7 +393,7 @@ public class Player {
 		if (fenParts.length>3) {			
 	
 			// fenParts[2] who's move w | b
-			currentGame.whoTurn = fenParts[2];
+			currentGame.max = fenParts[2];
 			
 			// fenParts[3] castling availability
 			for (int i = 0; i < fenParts[3].length(); i++) {

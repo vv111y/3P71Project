@@ -2,10 +2,20 @@
 
 TODO
 	
-	Willy:
+	email for what goes in root node
+		create root node
+			init bitboards
+			set castling rights
+			set enpassant mask
+			set move counters
+			generate nextmoveslist?
+	
 	class Player	
+		? add pieces to piece list @parseFEN
+	
+	gamestate
 		parse move 
-			position x x move xxxx xxxx xxxx 
+		check can actually castle 
 
 	class Thinker
 		understand threading , interrupt 
@@ -14,6 +24,18 @@ TODO
 		output info command?
 		uci bestmove
 		engine time & inc = which side engine is playing
+
+	engine
+		unsafe method
+		evaluate root node
+			are you in check
+			eval may decide on likely checking move, so score can't be too low
+			eval: # of pieces your attacking is added to eval score
+			total sum : # pieces + # moves possible/piece (moveability) + positional score (where on board) + # pieces attacking - opponents score (equivelant sum) 
+
+		rehash: has generate & makemoves classes right now. might unite
+		finish tree
+		code eval
 	
 
 	ACTIONS
