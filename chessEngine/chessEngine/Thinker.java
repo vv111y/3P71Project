@@ -104,8 +104,7 @@ class Thinker implements Runnable {
 	}
 	
 
-	// This method returns the engines chosen move.
-	// bestmove should be updated while searching
+	// This method returns the engines chosen move.	
 	// 
 	public void bestMove() {
 		String bestMove = "";

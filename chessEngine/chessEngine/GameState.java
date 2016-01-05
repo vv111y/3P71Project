@@ -34,19 +34,11 @@ public class GameState {
 	public boolean				wLCastle;			// whether white can long castle
 	public boolean				bSCastle;			// whether black can short castle
 	public boolean				bLCastle;			// whether black can long castle
-	public boolean				enPassant;			// whether en Passant attack is available
-	public int					plyCount;			// number of plys since game began
-	public int					fullMoves;			// number of full moves since game began
-	//TODO fen state stuff
-	// fenParts[2] who's move w | b
-	// fenParts[3] castling availability
-	// fenParts[4] en passant target square, none = "-"
-	// fenParts[5] halfmove clock. This is the number of halfmoves since the last capture or pawn advance. 
-	//            This is used to determine if a draw can be claimed under the fifty-move rule.
-	// fenParts[6] fullmove number. starts 1, increment after Black move
-				
+	public String				enPassant;			// whether en Passant attack is available
+	public int					halfMoves;			// The number of halfmoves since the last capture or pawn advance. For 50-move rule.
+	public int					fullMoves;			// number of full moves since game began, increment after Black move
 	
-	
+
 	// Constructor
 	public GameState () {
 		
@@ -62,8 +54,8 @@ public class GameState {
 		wLCastle = false;
 		bSCastle = false;
 		bLCastle = false;
-		enPassant = false;
-		plyCount = 0;
+		enPassant = "-";
+		halfMoves = 0;
 		fullMoves = 1;
 		
 		currentBoard = new String[][] {
@@ -80,14 +72,87 @@ public class GameState {
 	
 	// This method makes a move on the current board
 	// called by Player.commPosition
+	// UCI does not actually use LAN, but modified version
+	// <mLAN move descriptor piece moves> ::= <from square>[''|'x']<to square>
+	// <mLAN move descriptor pawn moves>  ::= <from square>[''|'x']<to square>[<promoted to>]
 	public void makeMove(String aMove) {
 		
-		//TODO move the piece on the currentBoard rep
+		String[] moveTokens = aMove.split("(?!^)");		// see http://stackoverflow.com/questions/5235401/split-string-into-array-of-character-strings
+		int fileFrom =0, fileTo =0;
+		int rankFrom =0, rankTo =0;
+		boolean capture = false;
+		int offset =0;
+		
+		if (moveTokens[2].equalsIgnoreCase("x")) { 
+			capture = true; 
+			offset = 1;
+		}
+		
+		fileFrom = parseFilePos(moveTokens[0]);		
+		rankFrom = Integer.parseInt(moveTokens[1]);
+		
+		fileTo = parseFilePos (moveTokens[2 + offset]);
+		rankTo = Integer.parseInt(moveTokens[3 + offset]);
+		
+		// l4xl5Q l4l5Q l4l5
+		// Promotion case
+		if (moveTokens.length > (4 + offset)) {
+			
+			//TODO
+			//'N' | 'B' | 'R' | 'Q' | 'K'
+			
+		}
+		
+		//TODO
+		// castling
+		
+		// capture piece info
+		
+		// update strings in currentBoard
+		// update pieces list
+		
+		
+
 		
 		// add move to move history list
 		gameHistory.add(aMove);
 	}
+	
+	private int parseFilePos (String token) {
+		int file = 0;
+		
+		switch (token)
+		{
+		case "a":
+			file =1;
+			break;
+		case "b":
+			file =2;
+			break;
+		case "c":
+			file=3;
+			break;
+		case "d":
+			file =4;
+			break;
+		case "e":
+			file =5;
+			break;
+		case "f":
+			file =6;
+			break;
+		case "g":
+			file =7;
+			break;
+		case "h":
+			file=8;
+			break;
+		}
+		
+		return file;		
+	}
 
+	
 	// This method resets all the game state parameters
 	// The move history is cleared and previously the 
 	// board should have the pieces returned to initial positions
@@ -103,21 +168,13 @@ public class GameState {
 		wLCastle = true;
 		bSCastle = true;
 		bLCastle = true;
-		enPassant = false;
-		plyCount = 0;
+		enPassant = "-";
+		halfMoves = 0;
 		fullMoves = 1;
 		
 		gameHistory.clear();
 	}
 	
-	// This method places a single piece on the current board
-	// Used by FEN position command
-	// @param 	piece 	piece using FEN notation
-	// 			rank	the row location
-	//			file 	the column location
-	//	public void placePiece(char piece, int rank, int file) {
-	//		
-	//		// TODO build currentBoard piece by piece
-	//	}
+
 	
 }

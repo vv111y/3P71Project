@@ -3,59 +3,25 @@
 TODO
 	
 	Willy:
-	class Player
-		go searchmoves ok?
+	class Player	
 		parse move 
 			position x x move xxxx xxxx xxxx 
-			move in 'go' too. 
-			need to change board
-		fenparse - fenparts 4 enpassant
-		debug 
-
-
 
 	class Thinker
 		understand threading , interrupt 
+		thinker.alert(go | stop) - handles the thread, when done returns to player
+
 		output info command?
 		uci bestmove
-			the engine has stopped searching and found the move <move> best in this position. the engine can send the move it likes to ponder on. The engine must not start pondering automatically.
-			this command must always be sent if the engine stops searching, also in pondering mode if there is a "stop" command, so for every "go" command a "bestmove" command is needed!
-			Directly before that the engine should send a final "info" command with the final search information, the the GUI has the complete statistics about the last search.
-
-	class game?
-		General
-			current board
-			make moves, reset 
-			timers, 
-			move history
-			turn, mate, checkmate, draw
-			removed pieces, moving rights/allowed
-		from go
-			winc, binc, movestogo, 
-		from position
-			startpos -> reset board @ currentGame state, maybe reset game
-			fen does board and currentGame state
-			moves -> currentGame state
-		from newgame - reset whole thing
-
-
-	class command?
-		from go
-			searchmoves, ponder, movestogo
-			depth, nodes, mate (search for), movetime, infinite
-		from position, newgame 
-			change game state -- thinker needs to know
-		from debug, setoption 
-			change thinker, needs to know too
-		ponderhit
-		stop
-
+		engine time & inc = which side engine is playing
+	
 
 	ACTIONS
 		Game Events
 			move, capture - removed piece, other adjustments?, piece count, 
 
 	HOLD
+		go searchmoves ok? skip till later
 		position
 			^^ board [parse fen]
 			^^ board [makeMove()]
@@ -85,6 +51,8 @@ DONE
 				movestogo <x> depth <x> nodes <x> mate <x> movetime <x>  infinite
 		position	
 			parse startpos
+			fenparse - fenparts 4 enpassant
+
 		stop
 		uci
 		isReady
@@ -102,6 +70,36 @@ DONE
 		names, interface
 		breakdown jobs
 			setup deadlines
+
+DESIGN
+
+	class game
+			General
+				current board
+				make moves, reset 
+				timers, 
+				move history
+				turn, mate, checkmate, draw
+				removed pieces, moving rights/allowed
+			from go
+				winc, binc, movestogo, 
+			from position
+				startpos -> reset board @ currentGame state, maybe reset game
+				fen does board and currentGame state
+				moves -> currentGame state
+			from newgame - reset whole thing
+
+
+		class command
+			from go
+				searchmoves, ponder, movestogo
+				depth, nodes, mate (search for), movetime, infinite
+			from position, newgame 
+				change game state -- thinker needs to know
+			from debug, setoption 
+				change thinker, needs to know too
+			ponderhit
+			stop
 
 
 NOTES

@@ -140,7 +140,7 @@ public class Player {
 	// Stop calculating as soon as possible, don't forget the "bestmove" and 
 	// possibly the "ponder" token when finishing the search          
 	private synchronized void commStop() {
-
+		//TODO redo
 		// interrupt the thread, 
 		thinker.stopThinking = false;
 		thinker.cortex.interrupt();
@@ -163,15 +163,16 @@ public class Player {
 			
 			try {
 				
-				if (goArgs[i].equals("searchmoves")) 
-				{
-					
-					for (int j = 0; j < goArgs.length; j++) {
-						
-						newCommand.searchMove(goArgs[j]);					
-					} 
-				}
-				else if (goArgs[i].equals("ponder")) 
+				// searchmoves functionality skipped for now
+//				if (goArgs[i].equals("searchmoves")) 
+//				{
+//					
+//					for (int j = 0; j < goArgs.length; j++) {
+//						
+//						newCommand.searchMove(goArgs[j]);					
+//					} 
+//				}
+				if (goArgs[i].equals("ponder")) 
 				{
 					newCommand.ponder = true;
 				}
@@ -230,14 +231,13 @@ public class Player {
 	// play the moves on the internal chess board.
 	// If the game was played from the start position the string "startpos" will be sent.
 	private void commPosition(String inputArgs) {
-		// TODO parse input, setup position
+
 		String[] positionArgs = inputArgs.split(" ");
 							
 		if (positionArgs[1].equals("startpos")) {
 			
-			// TODO not sure if reseting for new game
-			// but reset pieces to start anyways
-			String restartFEN = "fen rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+			// using a truncated fen string for starting positions. 
+			String restartFEN = "fen rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 			parseFEN(restartFEN);
 			
 		} else if (positionArgs[1].startsWith("fen")) {
@@ -263,7 +263,6 @@ public class Player {
 	
 	// This method parses a FEN string and adjusts game settings accordingly
 	private void parseFEN(String string) {
-		// TODO parse and make board rep
 		
 		String[] fenParts = string.split(" ");		
 		//String fenParts = fenParts[1];
@@ -389,43 +388,48 @@ public class Player {
 			}
 		}
 		
-		//TODO rest of fenParse
-		
-		// fenParts[2] who's move w | b
-		currentGame.whoTurn = fenParts[2];
-		
-		// fenParts[3] castling availability
-		for (int i = 0; i < fenParts[3].length; i++) {
+		// if this is not a position startpos command, then parse rest of fen string
+		if (fenParts.length>3) {			
+	
+			// fenParts[2] who's move w | b
+			currentGame.whoTurn = fenParts[2];
 			
-			if (fenParts[3].substring(i, i+1) == "K") 
-			{	
-				currentGame.bSCastle = true;
-			}
-			else if (fenParts[3].substring(i, i+1) == "Q")
-			{
-				currentGame.bLCastle = true;
-			}
-			else if (fenParts[3].substring(i, i+1) == "k")
-			{
-				currentGame.wSCastle = true;
-			}
-			else if (fenParts[3].substring(i, i+1) == "q")
-			{
-				currentGame.wLCastle = true;
-			}
+			// fenParts[3] castling availability
+			for (int i = 0; i < fenParts[3].length(); i++) {
 				
+				if (fenParts[3].substring(i, i+1) == "K") 
+				{	
+					currentGame.bSCastle = true;
+				}
+				else if (fenParts[3].substring(i, i+1) == "Q")
+				{
+					currentGame.bLCastle = true;
+				}
+				else if (fenParts[3].substring(i, i+1) == "k")
+				{
+					currentGame.wSCastle = true;
+				}
+				else if (fenParts[3].substring(i, i+1) == "q")
+				{
+					currentGame.wLCastle = true;
+				}
+					
+				
+			}
+			
+			// fenParts[4] en passant target square, none = "-"
+			currentGame.enPassant = fenParts[4];
+			
+			// fenParts[5] halfmove clock.  
+			//            This is used to determine if a draw can be claimed under the fifty-move rule.
+			currentGame.halfMoves = Integer.parseInt(fenParts[5]);
+			
+			// fenParts[6] fullmove number. starts 1, increment after Black move
+			currentGame.fullMoves = Integer.parseInt(fenParts[6]); 
 			
 		}
 		
-		// fenParts[4] en passant target square, none = "-"
-		// currentGame.enPassant = 
-		
-		// fenParts[5] halfmove clock. This is the number of halfmoves since the last capture or pawn advance. 
-		//            This is used to determine if a draw can be claimed under the fifty-move rule.
-		currentGame.plyCount = fenParts[5];
-		
-		// fenParts[6] fullmove number. starts 1, increment after Black move
-		currentGame.fullMoves = fenParts[6];
+
 		
 	}
 
