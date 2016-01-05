@@ -21,9 +21,10 @@ TODO
 		understand threading , interrupt 
 		thinker.alert(go | stop) - handles the thread, when done returns to player
 
+		TIMER - wiki
 		output info command?
 		uci bestmove
-		engine time & inc = which side engine is playing
+		engine time & inc depends which side engine is playing
 
 	engine
 		unsafe method

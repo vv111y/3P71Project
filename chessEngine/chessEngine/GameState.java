@@ -91,17 +91,25 @@ public class GameState {
 	// <mLAN move descriptor pawn moves>  ::= <from square>[''|'x']<to square>[<promoted to>]
 	public void makeMove(String aMove) {
 		
-		// check for castling first before breaking up move string
+		// check for castling first before breaking up move string. Can skip rest of method then.
 		// short castle
 		if (aMove.equals("O-O")) {
 			
 			if (max.equals("w")) {
 				
-				// TODO make white short castle move
+				// make white short castle move
+				currentBoard[0][4] = " "; // remove k
+				currentBoard[0][6] = "k"; // place k
+				currentBoard[0][7] = " "; // remove r
+				currentBoard[0][5] = "r"; // place r
 				return;
 
 			} else {
 				// make black short castle move
+				currentBoard[7][4] = " "; // remove K
+				currentBoard[7][6] = "k"; // place K
+				currentBoard[7][7] = " "; // remove R
+				currentBoard[7][5] = "r"; // place R
 				return;
 			}
 			
@@ -113,10 +121,18 @@ public class GameState {
 			if (max.equals("w")) {
 				
 				// make white long castle move
+				currentBoard[0][4] = " "; // remove k
+				currentBoard[0][2] = "k"; // place k
+				currentBoard[0][0] = " "; // remove r
+				currentBoard[0][3] = "r"; // place r
 				return;
 
 			} else {
 				// make black long castle move
+				currentBoard[7][4] = " "; // remove K
+				currentBoard[7][2] = "k"; // place K
+				currentBoard[7][0] = " "; // remove R
+				currentBoard[7][3] = "r"; // place R
 				return;
 			}
 			
@@ -127,11 +143,13 @@ public class GameState {
 		int rankFrom =0, rankTo =0;
 		boolean capture = false;
 		int offset =0;
+		boolean moverWhite = true;
 		
 		if (moveTokens[2].equalsIgnoreCase("x")) { 
 			capture = true; 
 			offset = 1;
 		}
+		
 		
 		fileFrom = parseFilePos(moveTokens[0]);		
 		rankFrom = Integer.parseInt(moveTokens[1]);
@@ -143,69 +161,118 @@ public class GameState {
 		String atFromSquare = currentBoard[rankFrom][fileFrom];
 		String atToSquare = currentBoard[rankTo][fileTo];
 		
-		// l4xl5Q l4l5Q l4l5
-		// Promotion case
+		if (atFromSquare.equals(atFromSquare.toLowerCase())) moverWhite = true;		// moving piece is white, black otherwise
+			
+		// cases: move to empty, capture, promote empty, promote capture, 
+		// distinguish bishops? but not knight or rook 
+		
+		// capture piece 
+		if (capture) {		
+			
+			if (!moverWhite) {  							// attacking piece black
+				
+				wOnBoard.remove(atToSquare);
+				wCaptured.add(atToSquare);
+			} else {
+				
+				bOnBoard.remove(atToSquare);				// attacking piece white
+				bCaptured.add(atToSquare);				
+			}			
+		}
+		
+		// update squares in currentBoard
+		currentBoard[rankFrom][fileFrom] = " ";				// vacate from square
+		currentBoard[rankTo][fileTo] = atFromSquare;	  	// place piece in new square
+		
+		// Pawn Promotion
 		if (moveTokens.length > (4 + offset)) {
 			
-			//TODO
-			//'N' | 'B' | 'R' | 'Q' | 'K'
 			switch (moveTokens[4 + offset])
 			{
 			case "N":
 				// promote to knight
+				if (moverWhite) {
+					currentBoard[rankTo][fileTo] = "n";
+					wOnBoard.remove("p");
+					wOnBoard.add("n");
+				} else {
+					currentBoard[rankTo][fileTo] = "N";
+					bOnBoard.remove("P");
+					bOnBoard.add("N");
+				}
 				break;
 			case "R":
 			// promote to rook
-			break;
+				if (moverWhite) {
+					currentBoard[rankTo][fileTo] = "r";
+					wOnBoard.remove("p");
+					wOnBoard.add("r");
+				} else {
+					currentBoard[rankTo][fileTo] = "R";
+					bOnBoard.remove("P");
+					bOnBoard.add("R");
+				}
+				break;
 			case "B":
 			// promote to bishop
-			break;
+				if (moverWhite) {
+					currentBoard[rankTo][fileTo] = "b";
+					wOnBoard.remove("p");
+					wOnBoard.add("b");
+				} else {
+					currentBoard[rankTo][fileTo] = "B";
+					bOnBoard.remove("P");
+					bOnBoard.add("B");
+				}
+				break;
 			case "Q":
 			// promote to queen
-
-			}
+				if (moverWhite) {
+					currentBoard[rankTo][fileTo] = "q";
+					wOnBoard.remove("p");
+					wOnBoard.add("q");
+				} else {
+					currentBoard[rankTo][fileTo] = "Q";
+					bOnBoard.remove("P");
+					bOnBoard.add("Q");
+				}
+				break;
+			}			
 		}	
-		
-		// cases: move to empty, capture, promote empty, promote capture, 
-		// distinguish bishops, but not knight or rook 
-		// capture piece info
-		// update strings in currentBoard
-		
-		// update pieces list
 		
 		// add move to move history list
 		gameHistory.add(aMove);
 	}
 	
-	
+	// This method used by makeMove to convert {a..h} file position into numbers
 	private int parseFilePos (String token) {
 		int file = 0;
 		
 		switch (token)
 		{
 		case "a":
-			file =1;
+			file =0;
 			break;
 		case "b":
-			file =2;
+			file =1;
 			break;
 		case "c":
-			file=3;
+			file=2;
 			break;
 		case "d":
-			file =4;
+			file =3;
 			break;
 		case "e":
-			file =5;
+			file =4;
 			break;
 		case "f":
-			file =6;
+			file =5;
 			break;
 		case "g":
-			file =7;
+			file =6;
 			break;
 		case "h":
-			file=8;
+			file=7;
 			break;
 		}
 		
