@@ -1,4 +1,16 @@
+<<<<<<< HEAD
 /Command.class
 /GameState.class
 /Player.class
 /Thinker.class
+=======
+/UCI.class
+/BoardGen.class
+/GenerateMoves.class
+/MakeMoves.class
+/SearchTree.class
+/NodeEvaluation.class
+/Node.class
+/BoardNode.class
+>>>>>>> refs/remotes/3P71Project/nick
+/.gitignore

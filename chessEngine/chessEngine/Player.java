@@ -139,26 +139,20 @@ public class Player {
 
 	// Stop calculating as soon as possible, don't forget the "bestmove" and 
 	// possibly the "ponder" token when finishing the search          
-	private synchronized void commStop() {
-		//TODO redo
-		// interrupt the thread, 
-		thinker.stopThinking = false;
-		thinker.cortex.interrupt();
-		
-		// wait a small time for engine to see interrupt and give best move
-		try {
-			wait(200);
-		} catch (InterruptedException e) {}		
+	private void commStop() {
+
+		thinker.stop();
 
 	}
 	
 	
 	// Start calculating on the current position set up with the "position" command.
 	// There are a number of commands that can follow this command, all will be sent in the same string.
-	private synchronized void commGo(String inputArgs) {
-		// TODO parse args, start thinking
+	private void commGo(String inputArgs) {
+
 		inputArgs.trim();
 		String[] goArgs = inputArgs.split(" ");
+		
 		for (int i = 0; i < goArgs.length; i++) {
 			
 			try {
@@ -224,6 +218,8 @@ public class Player {
 				System.out.println("Malformed 'go' command. Please try again.");
 			}
 		}
+		
+		thinker.go();
 	}
 
 	

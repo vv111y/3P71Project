@@ -12,17 +12,21 @@ TODO
 	
 	find perft
 
-	class Thinker
+	Thread
 		understand threading , interrupt 
 		thinker.alert(go | stop) - handles the thread, when done returns to player
+		hard alerts
+			go - take command params, start new search-thread
+			stop output best move, go to wait, notify then wait on thing
+		update alerts game, update internal root nodeXX, once update wait for go, then new thread
+			newgame
+			position
 
+
+		
+	class Thinker
 		TIMER - wiki
-		output info command?
-		uci bestmove
 		engine time & inc depends which side engine is playing
-
-	class Player	
-		? add pieces to piece list @parseFEN
 
 	engine
 		unsafe method
@@ -35,19 +39,18 @@ TODO
 		rehash: has generate & makemoves classes right now. might unite
 		finish tree
 		code eval
-	
+
 
 	ACTIONS
 		Game Events
 			move, capture - removed piece, other adjustments?, piece count, 
 
 	HOLD
+		update engine
+			debug
+			setoptions
 		go searchmoves ok? skip till later
-		position
-			^^ board [parse fen]
-			^^ board [makeMove()]
-		newgame
-			^^ rest [reset all] 
+	 
 		setOptions?
 			^^ parse rest of line
 
@@ -83,6 +86,18 @@ DONE
 		ucinewgame
 		quit
 
+		both safely done in search thread:
+		output info command?
+		
+		uci bestmove
+			position
+			[parse fen]
+			[makeMove()]
+		newgame
+			[reset all]
+
+	player	add pieces to piece list @parseFEN
+	
 	gamestate
 		parse move 
 		NO, trusting gui. done when searching only. check can actually castle 
@@ -161,13 +176,7 @@ logic crazy adv
 		(principal variation search)
 		(advanced theoretical evaluation)
 
-CODE SNIP
-		// test if Thinker is doing anything		
-		while (!thinker.cortexReady) {
-			try {
-				thinker.cortex.wait();
-			} catch (InterruptedException e) {}			
-		}
+
 
 ----------
 Required

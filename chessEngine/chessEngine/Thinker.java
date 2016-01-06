@@ -19,7 +19,9 @@ import java.util.List;
 // Supporting classes
 //		* Command
 //		* GameState
-//		* TODO all the other classes: boards, etc
+// 		* BoardGen
+//		* GenerateMoves
+//		* MakeMoves
 //
 // Exceptions & Interrupts
 //		* TODO stop command
@@ -35,6 +37,7 @@ class Thinker implements Runnable {
 	public volatile boolean 	cortexReady;		// flag to indicate whether cortex is not busy
 	public volatile boolean		terminate;			// flag to close thread
 	public volatile boolean 	stopThinking;		// flag to stop cortex from searching
+	private 
 	private Command				newCommand;			// reference to newCommand object
 	private GameState			currentGame;		// reference to currentGame object
 
@@ -42,101 +45,106 @@ class Thinker implements Runnable {
 
 	// Constructor. Engine initialization goes here
 	//	- new thread started. based on code in run method
-	//  - TODO other initializations: boards, evaluators, etc
   	Thinker(Command newCommand, GameState currentGame) {
 
-		terminate = false;
-		cortexReady = false;
-		stopThinking = true;
-		
 		this.newCommand = newCommand;
-		this.currentGame = currentGame;
+		this.currentGame = currentGame;	
+		// other thinking parameters. Likely from Command object
 		
-		cortex = new Thread(this);
-		cortex.start();
-
 		}
 
 	
-	
-	// This method executes the code for the cortex thread
-	// Cortex thread is the actual AI engine
-	public synchronized void run() {
+	// This method starts a new search thread. Could be for 
+  	// the next turn to search, or a new game.
+  	// The difference is resolved in the GameState object.
+	public void newSearch() {
 
-		InterruptedException notified = new InterruptedException();
+
+	}
+
+
+
+	// This method executes the code for the cortex thread
+	// Cortex thread does the actual search & evaluation for best move
+	public synchronized void run() {
 		
-		while (true) {		
+		// New search tree
+		SearchTree thisSearch = new SearchTree();
+		
+		// once built go in wait & notify thinker
+		//this.notifyAll();
+		
+		
+		
+		// wait on thinker in try/catch block
+		
+		// then go. (?more updates), in try/catch or loop with interrupt checking
+		// either finish/output/terminate OR interrupt then ditto
+		
+		
+		
+		while (!Thread.interrupted()) {		
 			try {
 				
 				// TODO SEARCH&EVAL CODE GOES HERE
-				// all code here is run from within the cortex thread
+				// new searchtree use gamestate
+				// wait state
+				// go command parse
+				// searchtree.startsearch()
+				
 				// throw InterruptedException somewhere
 				// in search loop test cortex.interrupted() to check if interrupt has occurred
-				// set flag cortexReady = false before crunching
-									
-				if (Thread.interrupted()) throw notified;				
-				while (true) {	
+//				if (Thread.interrupted()) throw notified;				
+//				while (true) {	
 
 //					System.out.println("this is coming from the cortex");
 //					Thread.sleep(5000);
-				}
+//				}
 				
-			} catch (InterruptedException e) {
+			} catch (InterruptedException notified) {
 				
-				// TODO need stop code here
-				// make sure bestmove is set
-				// gracefully finish work
-				
-				if (terminate) {
-					
-					stop();
-					break;
-					
-				} else if (stopThinking) {
-					
-					bestMove();
-					cortexReady = true;
-					stopThinking = false;
-					cortex.notifyAll();	
-				}
+				// TODO is this right?
+				System.out.println("bestmove " + SearchTree.bestMove());
+			    Thread.currentThread().interrupt();
+			    return;
+								
 			}	
 		}
 	}
 	
 
-	// This method returns the engines chosen move.	
-	// 
-	public void bestMove() {
-		String bestMove = "";
-		// TODO return the best move available & also ponder move2
-
-		System.out.println("bestmove " + bestMove);
-		notifyAll();
-		// goto wait state ie. newCommand.wait()
-		
-		//return bestMove;
-	}
-
 	
-	// This method outputs variety of information to the chess program
-	// about the engines analysis while it is thinking.
-	// Called from within the run method by cortex thread.
-	private void sendInfo() {
-		
-		// TODO any info we decide to send. see uci spec
-		// likely put in run. may need to give cortex 
-		// the main threads System.out
-		
-	}
-	
-	
-	// This method terminates the thread and cleans up
-	// Ignoring exception as not vital to closing executable.
+	// This method terminates the cortex thread. 
+	// Cortex thread will output bestmove
 	public void stop() {
 		
-		try {
-			cortex.join();
-		} catch (InterruptedException e) {}		
+		cortex.interrupt();
+	
+		// give a little time to output
+		try { wait(50); } catch (InterruptedException doNothing) {}
+		
 	}
+
+
+	// This method starts the thinker thinking via the cortex thread. 
+	// The command object parameters are used to specify the type
+	// of search. 
+	public void go() {
+		
+		// parse command object for search params & set them
+		
+		terminate = false;
+		cortexReady = false;
+		stopThinking = true;
+		
+		// start searching
+		
+		cortex = new Thread(this);
+		cortex.start();
+		
+		
+	}
+
+
 	
 }
