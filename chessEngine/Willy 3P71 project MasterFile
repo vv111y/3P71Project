@@ -10,12 +10,7 @@ TODO
 			set move counters
 			generate nextmoveslist?
 	
-	class Player	
-		? add pieces to piece list @parseFEN
-	
-	gamestate
-		parse move 
-		check can actually castle 
+	find perft
 
 	class Thinker
 		understand threading , interrupt 
@@ -25,6 +20,9 @@ TODO
 		output info command?
 		uci bestmove
 		engine time & inc depends which side engine is playing
+
+	class Player	
+		? add pieces to piece list @parseFEN
 
 	engine
 		unsafe method
@@ -84,6 +82,10 @@ DONE
 			thinker needs to go to wait state when ready
 		ucinewgame
 		quit
+
+	gamestate
+		parse move 
+		NO, trusting gui. done when searching only. check can actually castle 
 
 	Thinker
 		terminate should be ok

@@ -277,62 +277,73 @@ public class Player {
 			case 'r':
 				// white rook
 				currentGame.currentBoard[rank][file] = "r";
-				
+				currentGame.wOnBoard.add("r");
 				file++;
 				break;
 			case 'n':
 				// white knight
 				currentGame.currentBoard[rank][file] = "n";
+				currentGame.wOnBoard.add("n");
 				file++;
 				break;
 			case 'b':
 				// white bishop
 				currentGame.currentBoard[rank][file] = "b";
+				currentGame.wOnBoard.add("b");
 				file++;
 				break;
 			case 'q':
 				// white queen
 				currentGame.currentBoard[rank][file] = "q";
+				currentGame.wOnBoard.add("q");
 				file++;
 				break;
 			case 'k':
 				// white king
 				currentGame.currentBoard[rank][file] = "k";
+				currentGame.wOnBoard.add("k");
 				file++;
 				break;
 			case 'p':
 				// white pawn
 				currentGame.currentBoard[rank][file] = "p";
+				currentGame.wOnBoard.add("p");
 				file++;
 				break;
 			case 'R':
 				// black rook
 				currentGame.currentBoard[rank][file] = "R";
+				currentGame.bOnBoard.add("R");
 				file++;
 				break;
 			case 'N':
 				// black knight
 				currentGame.currentBoard[rank][file] = "N";
+				currentGame.bOnBoard.add("N");
 				file++;
 				break;
 			case 'B':
 				// black bishop
 				currentGame.currentBoard[rank][file] = "B";
+				currentGame.bOnBoard.add("B");
 				file++;
 				break;
 			case 'Q':
 				// black queen
 				currentGame.currentBoard[rank][file] = "Q";
+				currentGame.bOnBoard.add("Q");
 				file++;
 				break;
 			case 'K':
 				// black king
 				currentGame.currentBoard[rank][file] = "K";
+				currentGame.bOnBoard.add("K");
 				file++;
 				break;
 			case 'P':
 				// black pawn
 				currentGame.currentBoard[rank][file] = "P";
+				currentGame.bOnBoard.add("P");
 				file++;
 				break;
 			case '1':

@@ -9,6 +9,8 @@ import java.util.List;
 //		* Other information describing state of the game 
 //		* Note UCI is a stateless protocol - this class is not necessary but 
 //		* aids in organizing information & available for future functionality
+//		* does not test whether castling is allowed. Trusting GUI when that move
+//		* 	command is made. However, engine searching tests for non-blockage
 //
 //Methods
 //		* makeMove
@@ -22,7 +24,7 @@ import java.util.List;
 
 public class GameState {
 
-	public volatile String[][]	currentBoard;		// character representation of the current board state TODO volatile?
+	public String[][]	currentBoard;				// character representation of the current board state
 	public List<String> 		gameHistory;		// list of all the moves in a game
 	public List<String>			wOnBoard;			// list of white pieces on board
 	public List<String>			wCaptured;			// list of white pieces that are captured
@@ -244,7 +246,7 @@ public class GameState {
 		gameHistory.add(aMove);
 	}
 	
-	// This method used by makeMove to convert {a..h} file position into numbers
+	// This method used by makeMove to convert {a..h} file(column) position into numbers
 	private int parseFilePos (String token) {
 		int file = 0;
 		
