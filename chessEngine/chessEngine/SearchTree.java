@@ -87,4 +87,10 @@ public class SearchTree {
 	public String makeNextMoves(long bitboard) {
 		
 	}
+
+
+	public static String bestMove() {
+		// FIXME Auto-generated method stub
+		return null;
+	}
 }

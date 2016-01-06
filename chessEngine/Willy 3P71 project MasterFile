@@ -41,9 +41,12 @@ TODO
 		code eval
 
 
-	ACTIONS
-		Game Events
-			move, capture - removed piece, other adjustments?, piece count, 
+	DEBUG
+		threading: uci isReady, etc
+		perft
+		games
+		elo estimate http://chess.stackexchange.com/questions/12790/how-to-measure-strength-of-my-own-chess-engine
+
 
 	HOLD
 		update engine
@@ -52,13 +55,7 @@ TODO
 		go searchmoves ok? skip till later
 	 
 		setOptions?
-			^^ parse rest of line
-
-	DEBUG
-		threading: uci isReady, etc
-		perft
-		games
-		elo estimate http://chess.stackexchange.com/questions/12790/how-to-measure-strength-of-my-own-chess-engine
+			parse rest of line
 
 
 DONE
@@ -113,6 +110,10 @@ DONE
 
 DESIGN
 
+	ACTIONS
+		Game Events
+			move, capture - removed piece, other adjustments?, piece count, 
+
 	class game
 			General
 				current board
@@ -130,7 +131,7 @@ DESIGN
 			from newgame - reset whole thing
 
 
-		class command
+	class command
 			from go
 				searchmoves, ponder, movestogo
 				depth, nodes, mate (search for), movetime, infinite

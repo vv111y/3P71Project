@@ -130,8 +130,6 @@ public class Player {
 	        {
 	        	// Close Engine.
 	        	input.close();
-	            thinker.terminate = true;	           
-				thinker.stop();    
 	            System.exit(0);
 	        }
 	    } 	

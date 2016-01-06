@@ -11,10 +11,9 @@ import java.util.List;
 //
 // Methods
 //		* run
-//		* bestMove
-//		* sendInfo
-//		* makeMove
-//		* TODO ??interrupt code
+//		* go
+//		* stop
+//		* newSearch
 //
 // Supporting classes
 //		* Command
@@ -24,7 +23,7 @@ import java.util.List;
 //		* MakeMoves
 //
 // Exceptions & Interrupts
-//		* TODO stop command
+//		* stop command
 //		* ALL code end with cortex.notifyAll()
 //
 // COSC 3P71 Main Project, Fall 2015 
@@ -33,35 +32,20 @@ import java.util.List;
 
 class Thinker implements Runnable {
 	
-	public final Thread 		cortex;				// thread object for engine code
-	public volatile boolean 	cortexReady;		// flag to indicate whether cortex is not busy
-	public volatile boolean		terminate;			// flag to close thread
-	public volatile boolean 	stopThinking;		// flag to stop cortex from searching
-	private 
-	private Command				newCommand;			// reference to newCommand object
-	private GameState			currentGame;		// reference to currentGame object
+	private Thread 		cortex;				// thread object for engine code
+	private Command		newCommand;			// reference to newCommand object
+	private GameState	currentGame;		// reference to currentGame object
 
 		 
 
 	// Constructor. Engine initialization goes here
-	//	- new thread started. based on code in run method
   	Thinker(Command newCommand, GameState currentGame) {
 
 		this.newCommand = newCommand;
-		this.currentGame = currentGame;	
-		// other thinking parameters. Likely from Command object
+		this.currentGame = currentGame;		
+		cortex = null;
 		
-		}
-
-	
-	// This method starts a new search thread. Could be for 
-  	// the next turn to search, or a new game.
-  	// The difference is resolved in the GameState object.
-	public void newSearch() {
-
-
 	}
-
 
 
 	// This method executes the code for the cortex thread
@@ -69,11 +53,11 @@ class Thinker implements Runnable {
 	public synchronized void run() {
 		
 		// New search tree
-		SearchTree thisSearch = new SearchTree();
+		SearchTree thisSearch = new SearchTree(this.currentGame);
 		
 		// once built go in wait & notify thinker
 		//this.notifyAll();
-		
+		System.out.println(this.newCommand.bInc);
 		
 		
 		// wait on thinker in try/catch block
@@ -133,14 +117,19 @@ class Thinker implements Runnable {
 		
 		// parse command object for search params & set them
 		
-		terminate = false;
-		cortexReady = false;
-		stopThinking = true;
-		
 		// start searching
-		
 		cortex = new Thread(this);
 		cortex.start();
+		
+		// timed search. Wait and then force stop
+		if (newCommand.moveTime > 0) { 
+			
+			try {
+				Thread.sleep(newCommand.moveTime);
+			} catch (InterruptedException e) { }
+			
+			this.stop();
+		}
 		
 		
 	}
