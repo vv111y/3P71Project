@@ -14,7 +14,7 @@ import java.util.Stack;
  * 		nodes
  * 
  * Returns:
- * 		best move to make:		bitboard (Long)
+ * 		best move to make:		String (x1y1x2y2 format)
  * 
  * 
  */
@@ -86,5 +86,23 @@ public class SearchTree {
 	
 	public String makeNextMoves(long bitboard) {
 		
+	}
+	
+	public int scoreBoard(long gameBoard, long unsafeBoard, int depth, String type) {
+		int score = 0;
+		int mat = material(gameBoard, type);
+		score += attacks(unsafeBoard);
+		score += mat;
+		score += moves(gameBoard);
+		score += position(mat);
+		
+//		AlphaBetaChess.flipBoard();
+//		material=rateMaterial();
+//		counter-=rateAttack();
+//		counter-=material;
+//		counter-=rateMoveablitly(list, depth, material);
+//		counter-=ratePositional(material);
+//		AlphaBetaChess.flipBoard();
+//		return -(counter+depth*50);
 	}
 }

@@ -99,24 +99,6 @@ public class NodeEvaluation {
 			-50,-30,-30,-30,-30,-30,-30,-50
 	};
 	
-	public int scoreBoard(long gameBoard, long unsafeBoard, int depth, String type) {
-		int score = 0;
-		int mat = material(gameBoard, type);
-		score += attacks(unsafeBoard);
-		score += mat;
-		score += moves(moves);
-		score += position(mat);
-		
-//		AlphaBetaChess.flipBoard();
-//		material=rateMaterial();
-//		counter-=rateAttack();
-//		counter-=material;
-//		counter-=rateMoveablitly(list, depth, material);
-//		counter-=ratePositional(material);
-//		AlphaBetaChess.flipBoard();
-//		return -(counter+depth*50);
-	}
-	
 	/*
 	 * Scores the value of all pieces on board
 	 */
@@ -131,7 +113,7 @@ public class NodeEvaluation {
 		case "R": // rook
 			score = 500 * bitCnt;
 			break;
-		case "K": // knight
+		case "N": // knight
 			score = 300 * bitCnt;
 			break;
 		case "B": // bishop
@@ -151,28 +133,57 @@ public class NodeEvaluation {
 		return score;
 	}
 	
+	// takes the unsafe bitboard and returns the number of unsafe positions
 	public int attacks(long unsafeBoard) {
 		return Long.bitCount(unsafeBoard);
 	}
 	
 	
-	public int moveability(long bitboard) {
+	// takes the moveList for the leaf node and returns the number of moves possible
+	public int moves(String moveList) {
+		int i = 0;
+		int moveCnt = 0;
 		
+		while (i < moveList.length()) {
+			moveCnt++;
+			i += 4;
+		}
 		
-		// takes bitboard generates possible moves
-		// +5 for each move possible
-		// -200000*depth for if checkmate
-		// -150000*depth for stalemate
-
+		return moveCnt;
 	}
 	
-	public int position(int material) {
-
-		// takes material score, bitboard, type
-		// if type is king and score is below a certain level use endgame
-		// otherwise use midgame
+	public int position(long bitboard, String type) {
+		// takes bitboard and string for piece type
+		int score = 0;
+		int[] pcValues = null;
 		
+		switch (type) {
+		case "P": // pawn
+			pcValues = pawnScores;
+			break;
+		case "R": // rook
+			pcValues = rookScores;
+			break;
+		case "N": // knight
+			pcValues = knightScores;
+			break;
+		case "B": // bishop
+			pcValues = bishopScores;
+			break;
+		case "Q": 
+			pcValues = queenScores;
+			break;
+		case "K":
+			// TODO how to determine mid from end game?
+		}
+		
+		for (int i = 0; i < 64; i++) {
+			if ((bitboard & (1L << i)) != 0) {
+			   score += pcValues[i];
+			}
+		}
+		
+		return score;
 	}
 }
 
-}
