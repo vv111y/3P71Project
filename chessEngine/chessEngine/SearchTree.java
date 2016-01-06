@@ -34,7 +34,7 @@ public class SearchTree {
 	 */
 	
 	public String alphaBeta() {
-		LinkedList<BoardNode> moveList = new LinkedList(); // maintain list of nodes off root
+		LinkedList<BoardNode> moveList = new LinkedList<>(); // maintain list of nodes off root
 		int bestScore = 0;
 		
 		while (!root.moves.moveList.isEmpty()) { // create new nodes with moves from moveList
