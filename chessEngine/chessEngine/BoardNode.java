@@ -3,7 +3,7 @@ package chessEngine;
 
 /*
  * BoardNode holds all informtion regarding a single game state.
- * It is able to create its own moveList, children, and evaluate its
+ * It is able to create its own moveList and evaluate its
  * own heuristic score.
  */
 
@@ -34,19 +34,7 @@ public class BoardNode {
 		game = g;
 		arrayToBB(game.currentBoard);
 		moves = new MoveList(); // create new moveList object
-
-		switch (game.max) {
-		case "W":
-			moves.whiteMoves(wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK, game.wSCastle, game.wLCastle);
-			break;
-		case "B":
-			moves.blackMoves(wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK, game.bSCastle, game.bLCastle);
-			break;
-		default:
-			// TODO THROW ERROR
-			break;
-		}
-
+		createMoves();
 	}
 
 	/*
@@ -114,9 +102,18 @@ public class BoardNode {
 		}
 	}
 	
-	// method updates moveList for newNode create
-	public void updateMoves() {
-		moves = new MoveList(); // create new moveList object
+	public void createMoves() {
+		switch (game.max) {
+		case "W":
+			moves.whiteMoves(wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK, game.wSCastle, game.wLCastle);
+			break;
+		case "B":
+			moves.blackMoves(wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK, game.bSCastle, game.bLCastle);
+			break;
+		default:
+			// TODO THROW ERROR
+			break;
+		}
 	}
 	
 	/*
@@ -126,10 +123,10 @@ public class BoardNode {
 	public int scoreBoard() {
 		switch (game.max) {
 		case "W":
-			score = scoreWhite() - scoreBlack();
+			score = scoreWhite() - scoreBlack() + moves.moveList.size();
 			break;
 		case "B":
-			score = scoreBlack() - scoreWhite();
+			score = scoreBlack() - scoreWhite() + moves.moveList.size();
 			break;
 		default:
 			// TODO THROW ERROR
@@ -161,9 +158,6 @@ public class BoardNode {
 		playerScore += eval.position(wQ, "Q", material, false);
 		playerScore += eval.position(wK, "K", material, false);
 		
-		// calculate number of moves possible from current position
-		playerScore += eval.moves(moveList);
-		
 		// calculate penalty for pieces in danger
 		unsafeMoves = moves.unsafe(false, bP, bN, bB, bR, bQ, bK);
 		unsafeMoves &= (bP | bN | bB | bR | bQ | bK);
@@ -194,9 +188,6 @@ public class BoardNode {
 		playerScore += eval.position(bQ, "Q", material, true);
 		playerScore += eval.position(bK, "K", material, true);
 		
-		// calculate number of moves possible from current position
-		playerScore += eval.moves(moveList);
-		
 		// calculate penalty for pieces in danger
 		unsafeMoves = moves.unsafe(true, wP, wN, wB, wR, wQ, wK);
 		unsafeMoves &= (bP | bN | bB | bR | bQ | bK);
@@ -211,9 +202,6 @@ public class BoardNode {
 	/*
 	 * Setters
 	 */
-//	public void setBest(long bitboard) { // set best move for starting board
-//		bestMove = bitboard;
-//	}
 
 	public int setScore(int eval) { // set evaluation score for start board
 		score = eval;
@@ -229,9 +217,7 @@ public class BoardNode {
 	/*
 	 * Getters
 	 */
-//	public long getBest() { // get best move for starting board
-//		return bestMove;
-//	}
+
 
 	public int getScore() { // get evaluation score for start board
 		return score;

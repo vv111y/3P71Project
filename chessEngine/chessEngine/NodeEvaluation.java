@@ -9,6 +9,7 @@ package chessEngine;
  * 		attack		-sum(# of pieces under attack)
  * 
  * Node evaluation matrices are from http://chessprogramming.wikispaces.com/Simplified+evaluation+function
+ * Piece evaluation values are based on Claude Shannon (1949) and are expressed in centipawns
  * 
  */
 
@@ -129,20 +130,7 @@ public class NodeEvaluation {
 	public int attacks(long unsafeBoard) {
 		return Long.bitCount(unsafeBoard);
 	}
-	
-	
-	// takes the moveList for the leaf node and returns the number of moves possible
-	public int moves(String moveList) {
-		int i = 0;
-		int moveCnt = 0;
-		
-		while (i < moveList.length()) {
-			moveCnt++;
-			i += 4;
-		}
-		
-		return moveCnt;
-	}
+
 	
 	// takes bitboard and string for piece type
 	public int position(long bitboard, String type, int material, boolean reverse) {
@@ -177,6 +165,7 @@ public class NodeEvaluation {
 			}
 		}
 		
+		// loop through bitboards and calculate position values
 		for (int i = 0; i < 64; i++) {
 			if ((bitboard & (1L << i)) != 0) {
 			   score += pcValues[i];
