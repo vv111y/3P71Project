@@ -1,5 +1,6 @@
 package chessEngine;
 
+import java.util.LinkedList;
 
 /*
  * Minimax with Alpha-Beta pruning
@@ -36,13 +37,24 @@ public class SearchTree {
 	 */
 	
 	public String alphaBeta() {
+		LinkedList<BoardNode> moveList = new LinkedList();
+		int bestScore = 0;
+		
 		while (!root.moves.moveList.isEmpty()) {
 			int depth = 0;
 			// create new node from moveList
-			BoardNode nextNode = new BoardNode(makeMove(root));
-			maxValue(nextNode, depth, Integer.MIN_VALUE, Integer.MAX_VALUE);
+			BoardNode newNode = new BoardNode(root.game);
+			newNode = makeMove(newNode);
+			moveList.add(newNode);
+			bestScore = maxValue(newNode, depth, Integer.MIN_VALUE, Integer.MAX_VALUE);
 		}
-		return root.bestMove;
+		
+		BoardNode bestMove = moveList.remove();
+		while (bestMove.score != bestScore) {
+			bestMove = moveList.remove();
+		}
+		
+		return bestMove.moveMade;
 	}
 	
 	
@@ -50,32 +62,37 @@ public class SearchTree {
 		if (depth == ply) {
 			return nextNode.scoreBoard();
 		}
-		int value; 
 		nextNode.setScore(alpha);
 		while (!nextNode.moves.moveList.isEmpty()) {
-			value = nextNode.setScore(Math.max(nextNode.getScore(), minValue(new BoardNode(makeMove(nextNode), depth + 1, alpha, beta))));
-			if (value >= beta) {
-				return value;
+			// create new node from moveList
+			BoardNode newNode = new BoardNode(nextNode.game);
+			newNode = makeMove(newNode);
+			nextNode.setScore(Math.max(nextNode.getScore(), minValue(newNode, depth + 1, alpha, beta)));
+			if (nextNode.getScore() >= beta) {
+				return nextNode.getScore();
 			}
-			alpha = Math.max(alpha, value);
+			alpha = Math.max(alpha, nextNode.getScore());
 		}
-		return value;
+		return nextNode.getScore();
 	}
+	
 	
 	public int minValue(BoardNode nextNode, int depth, int alpha, int beta) {
 		if (depth == ply) {
 			return nextNode.scoreBoard();
 		}
-		int value; 
 		nextNode.setScore(beta);
 		while (!nextNode.moves.moveList.isEmpty()) {
-			value = nextNode.setScore(Math.min(nextNode.getScore(), maxValue(new BoardNode(makeMove(nextNode), depth + 1, alpha, beta))));
-			if (value <= alpha) {
-				return value;
+			// create new node from moveList
+			BoardNode newNode = new BoardNode(nextNode.game);
+			newNode = makeMove(newNode);
+			nextNode.setScore(Math.min(nextNode.getScore(), maxValue(nextNode, depth + 1, alpha, beta)));
+			if (nextNode.getScore() <= alpha) {
+				return nextNode.getScore();
 			}
-			beta = Math.min(beta, value);
+			beta = Math.min(beta, nextNode.getScore());
 		}
-		return value;
+		return nextNode.getScore();
 	}
 	
 	
@@ -83,20 +100,31 @@ public class SearchTree {
 	 * Methods to create bitboards for new children
 	 */
 
-	public String[][] makeMove(BoardNode currentNode) {
-		String[][] newBoard = currentNode.game.CurrentBoard;
-		String nextMove = currentNode.moves.moveList.remove();
+	public BoardNode makeMove(BoardNode node) {
+		BoardNode newNode = node;
+		String[][] newBoard = newNode.game.currentBoard;
+		String nextMove = newNode.moves.moveList.remove();
+		newNode.moveMade = nextMove;
 		String piece = newBoard[nextMove.charAt(0)][nextMove.charAt(1)];
 		newBoard[nextMove.charAt(0)][nextMove.charAt(1)] = " ";
 		newBoard[nextMove.charAt(2)][nextMove.charAt(3)] = "piece";
 		
-		if (currentNode.game.max = "W") {
-			currentNode.game.max = "B"
-		} else {
-			currentNode.game.max = "W"
+		switch (newNode.game.max) {
+		case "W":
+			newNode.game.max = "B";
+			break;
+		case "B":
+			newNode.game.max = "W";
+			break;
+		default:
+			//TODO throw exception
+			break;
 		}
+		
+		newNode.arrayToBB(newBoard);
+		newNode.updateMoves();
 			
-		return newBoard;
+		return newNode;
 	}
 
 }
