@@ -1,5 +1,12 @@
 package chessEngine;
 
+
+/*
+ * BoardNode holds all informtion regarding a single game state.
+ * It is able to create its own moveList, children, and evaluate its
+ * own heuristic score.
+ */
+
 public class BoardNode {
 	
 	// bitboards for pieces
@@ -8,10 +15,12 @@ public class BoardNode {
 	long bP = 0L, bN = 0L, bB = 0L, bR = 0L, bQ = 0L, bK = 0L; // black
 	
 	// objects
+	GameState game = new GameState();
 	MoveList moves;
+	NodeEvaluation eval;
 	
 	String				moveList;			// moves that can be made from current state
-	long 				bestMove; 			// best move
+	String 				bestMove; 			// best move (x1y1x2y2)
 	long				unsafeMoves;		// board for all unsafe moves
 	int 				score; 				// evaluation of board
 	int 				alpha, beta; 		// search bounds for board
@@ -21,20 +30,17 @@ public class BoardNode {
 	/*
 	 * Constructors
 	 */
-	public BoardNode(GameState game) { // set start board for node
+	public BoardNode(GameState g) { // set start board for node
+		game = g;
 		arrayToBB(game.currentBoard);
 		moves = new MoveList(); // create new moveList object
 
 		switch (game.max) {
 		case "W":
 			moveList = moves.whiteMoves(wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK, game.wSCastle, game.wLCastle);
-			unsafeMoves = moves.unsafe(false, bP, bN, bB, bR, bQ, bK);
-			unsafeMoves &= (bP | bN | bB | bR | bQ | bK);
 			break;
 		case "B":
 			moveList = moves.blackMoves(wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK, game.bSCastle, game.bLCastle);
-			unsafeMoves = moves.unsafe(true, wP, wN, wB, wR, wQ, wK);
-			unsafeMoves &= (wP | wN | wB | wR | wQ | wK);
 			break;
 		default:
 			// TODO THROW ERROR
@@ -107,102 +113,80 @@ public class BoardNode {
 			return Long.parseLong("1" + bitboard.substring(2), 2) * 2;
 		}
 	}
-
-	public long makeMove(long board, String move, char type) {
-		if (Character.isDigit(move.charAt(3))) { // just a move
-			int start = (Character.getNumericValue(move.charAt(0)) * 8) // multiply by to get proper bit index
-					+ (Character.getNumericValue(move.charAt(1)));
-			int end = (Character.getNumericValue(move.charAt(2)) * 8) // multiply by to get proper bit index
-					+ (Character.getNumericValue(move.charAt(3)));
-			if (((board >>> start) & 1) == 1) { // check that starting location exists on board
-				board &= ~(1L << start); // remove piece from starting location
-				board |= (1L << end); // add piece to destination
-			} else {
-				board &= ~(1L << end); // removes piece at destination if capture occurs
-			}
-		} else if (move.charAt(3) == 'P') { // pawn promotion
-			int start, end;
-			if (Character.isUpperCase(move.charAt(2))) { // if white move
-				start = Long.numberOfTrailingZeros(moves.fileMasks[move.charAt(0)-'0'] & moves.rankMasks[1]);
-				end = Long.numberOfTrailingZeros(moves.fileMasks[move.charAt(1)-'0'] & moves.rankMasks[0]);
-			} else { // black move
-				start = Long.numberOfTrailingZeros(moves.fileMasks[move.charAt(0)-'0'] & moves.rankMasks[6]);
-				end = Long.numberOfTrailingZeros(moves.fileMasks[move.charAt(1)-'0'] & moves.rankMasks[7]);
-			}
-			if (type == move.charAt(2)) { // check that piece promotion matches board type
-				board |= (1L << end); // add promoted piece to destination
-			} else {
-				board &= ~(1L << start); // remove pawn from starting location
-				board &= ~(1L << end); // remove pawn from destination
-			}
-		} else if (move.charAt(3)=='E') {//en passant
-			int start, end;
-			if (move.charAt(2)=='W') { // white move
-				start = Long.numberOfTrailingZeros(moves.fileMasks[move.charAt(0)-'0'] & moves.rankMasks[3]);
-				end  = Long.numberOfTrailingZeros(moves.fileMasks[move.charAt(1)-'0'] & moves.rankMasks[2]);
-				board &= ~(moves.fileMasks[move.charAt(1)-'0'] & moves.rankMasks[3]);
-			} else { // black move
-				start = Long.numberOfTrailingZeros(moves.fileMasks[move.charAt(0)-'0'] & moves.rankMasks[4]);
-				end = Long.numberOfTrailingZeros(moves.fileMasks[move.charAt(1)-'0'] & moves.rankMasks[5]);
-				board &= ~(moves.fileMasks[move.charAt(1)-'0'] & moves.rankMasks[4]);
-			}
-			if (((board >>> start) & 1) == 1) { // check that starting location exists on board
-				board &= ~(1L << start); // remove piece from starting location
-				board |= (1L << end); // add piece to destination
-			}
-		} else { // catch errors in move list
-			System.out.print("ERROR: Invalid move type");
+	
+	/*
+	 * Methods to evaluate node
+	 */
+	
+	public void scoreBoard() {
+		switch (game.max) {
+		case "W":
+			score = scoreWhite() - scoreBlack();
+			break;
+		case "B":
+			score = scoreBlack() - scoreWhite();
+			break;
+		default:
+			// TODO THROW ERROR
+			break;
 		}
-		return board;
 	}
-
-	public long makeMoveEP(long board, String move) {
-		if (Character.isDigit(move.charAt(3))) { // check move type
-			int start = (Character.getNumericValue(move.charAt(0)) * 8) // multiply by to get proper bit index
-					+ (Character.getNumericValue(move.charAt(1)));
-			if ((Math.abs(move.charAt(0) - move.charAt(2)) == 2)
-					&& (((board >>> start) & 1) == 1)) { // move is a pawn double push
-				return moves.fileMasks[move.charAt(1)-'0']; // return mask for file where en passant is possible
-			}
-		}
-		return 0;
+	
+	public int scoreWhite() {
+		int score = 0;
+		
+		// calculate material value for each piece type
+		score += eval.material(wP, "P");
+		score += eval.material(wR, "R");
+		score += eval.material(wN, "N");
+		score += eval.material(wB, "B");
+		score += eval.material(wQ, "Q");
+		
+		// calculate positional value of each piece type
+		score += eval.position(wP, "P");
+		score += eval.position(wR, "R");
+		score += eval.position(wN, "N");
+		score += eval.position(wB, "B");
+		score += eval.position(wQ, "Q");
+		score += eval.position(wK, "K");
+		
+		// calculate number of moves possible from current position
+		score += eval.moves(moveList);
+		
+		// calculate penalty for pieces in danger
+		unsafeMoves = moves.unsafe(false, bP, bN, bB, bR, bQ, bK);
+		unsafeMoves &= (bP | bN | bB | bR | bQ | bK);
+		score -= eval.attacks(unsafeMoves);
 	}
-
-	public long makeMoveCastle(long rBoard, long kBoard, String move, char type) {
-		int start = (Character.getNumericValue(move.charAt(0)) * 8) // multiply by to get proper bit index
-				+ (Character.getNumericValue(move.charAt(1)));
-		if ((((kBoard >>> start) & 1) == 1) // ensure king is still in starting position
-				&& (("0402".equals(move))  // black, queen side castle
-						|| ("0406".equals(move)) // black, king side castle
-						|| ("7472".equals(move)) // white, queen side
-						|| ("7476".equals(move)))) { // white, king side
-			if (type == 'R') { // white move
-				switch (move) {
-				case "7472": // queen side
-					rBoard &= ~(1L << 56); // remove rook from starting location
-					rBoard |= (1L << (56 + 3)); // add rook to destination
-					break;
-
-				case "7476": // king side
-					rBoard &= ~(1L << 63); // remove rook from starting location
-					rBoard |= (1L << (63 - 2)); // add rook to destination
-					break;
-				}
-			} else { // black move
-				switch (move) {
-				case "0402": // queen side
-					rBoard &= ~(1L << 0); // remove rook from starting location
-					rBoard |= (1L << (0 + 3)); // add rook to destination
-					break;
-				case "0406": // king side
-					rBoard &= ~(1L << 7); // remove rook from starting location
-					rBoard |= (1L << (7 - 2)); // add rook to destination
-					break;
-				}
-			}
-		}
-		return rBoard;
+	
+	public int scoreBlack() {
+		int score = 0;
+		
+		// calculate material value for each piece type
+		score += eval.material(bP, "P");
+		score += eval.material(bR, "R");
+		score += eval.material(bN, "N");
+		score += eval.material(bB, "B");
+		score += eval.material(bQ, "Q");
+		
+		// calculate positional value of each piece type
+		score += eval.position(bP, "P");
+		score += eval.position(bR, "R");
+		score += eval.position(bN, "N");
+		score += eval.position(bB, "B");
+		score += eval.position(bQ, "Q");
+		score += eval.position(bK, "K");
+		
+		// calculate number of moves possible from current position
+		score += eval.moves(moveList);
+		
+		// calculate penalty for pieces in danger
+		unsafeMoves = moves.unsafe(true, wP, wN, wB, wR, wQ, wK);
+		unsafeMoves &= (bP | bN | bB | bR | bQ | bK);
+		score -= eval.attacks(unsafeMoves);
 	}
+	
+	
 
 
 	/*

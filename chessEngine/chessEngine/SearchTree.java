@@ -1,6 +1,5 @@
 package chessEngine;
 
-import java.util.Stack;
 
 /*
  * Minimax with Alpha-Beta pruning
@@ -24,7 +23,7 @@ public class SearchTree {
 	int ply;
 	BoardNode root;
 	
-	public SearchTree(long board, int maxDepth, String moveList) {
+	public SearchTree(GameState board, int maxDepth) {
 		ply = maxDepth;
 		root = new BoardNode(board); // bitboard
 	}
@@ -41,9 +40,11 @@ public class SearchTree {
 	 * bitboard of the bestMove.
 	 */
 	
-	public Long alphaBeta(long bitboard) {		
-		root = maxValue(bitboard, depth, Integer.MIN_VALUE, Integer.MAX_VALUE);
-		return root.bestMove;
+	public String alphaBeta() {
+		while (!root.moveList.isEmpty()) {
+			maxValue(bitboard, depth, Integer.MIN_VALUE, Integer.MAX_VALUE);
+			return root.bestMove;
+		}
 	}
 	
 	
@@ -60,7 +61,7 @@ public class SearchTree {
 	 * 	return value
 	 */
 	
-	public BoardNode maxValue(long bitboard, int depth, int alpha, int beta) {
+	public void maxValue(long bitboard, int depth, int alpha, int beta) {
 		if (depth == ply) {
 			return scoreBoard(bitboard);
 		}
@@ -84,25 +85,105 @@ public class SearchTree {
 	 * 	return value
 	 */
 	
-	public String makeNextMoves(long bitboard) {
-		
-	}
 	
-	public int scoreBoard(long gameBoard, long unsafeBoard, int depth, String type) {
-		int score = 0;
-		int mat = material(gameBoard, type);
-		score += attacks(unsafeBoard);
-		score += mat;
-		score += moves(gameBoard);
-		score += position(mat);
-		
-//		AlphaBetaChess.flipBoard();
-//		material=rateMaterial();
-//		counter-=rateAttack();
-//		counter-=material;
-//		counter-=rateMoveablitly(list, depth, material);
-//		counter-=ratePositional(material);
-//		AlphaBetaChess.flipBoard();
-//		return -(counter+depth*50);
+	/*
+	 * Methods to create bitboards for new children
+	 */
+
+	public long makeMove(long board, String move, char type) {
+		if (Character.isDigit(move.charAt(3))) { // just a move
+			int start = (Character.getNumericValue(move.charAt(0)) * 8) // multiply by to get proper bit index
+					+ (Character.getNumericValue(move.charAt(1)));
+			int end = (Character.getNumericValue(move.charAt(2)) * 8) // multiply by to get proper bit index
+					+ (Character.getNumericValue(move.charAt(3)));
+			if (((board >>> start) & 1) == 1) { // check that starting location exists on board
+				board &= ~(1L << start); // remove piece from starting location
+				board |= (1L << end); // add piece to destination
+			} else {
+				board &= ~(1L << end); // removes piece at destination if capture occurs
+			}
+		} else if (move.charAt(3) == 'P') { // pawn promotion
+			int start, end;
+			if (Character.isUpperCase(move.charAt(2))) { // if white move
+				start = Long.numberOfTrailingZeros(moves.fileMasks[move.charAt(0)-'0'] & moves.rankMasks[1]);
+				end = Long.numberOfTrailingZeros(moves.fileMasks[move.charAt(1)-'0'] & moves.rankMasks[0]);
+			} else { // black move
+				start = Long.numberOfTrailingZeros(moves.fileMasks[move.charAt(0)-'0'] & moves.rankMasks[6]);
+				end = Long.numberOfTrailingZeros(moves.fileMasks[move.charAt(1)-'0'] & moves.rankMasks[7]);
+			}
+			if (type == move.charAt(2)) { // check that piece promotion matches board type
+				board |= (1L << end); // add promoted piece to destination
+			} else {
+				board &= ~(1L << start); // remove pawn from starting location
+				board &= ~(1L << end); // remove pawn from destination
+			}
+		} else if (move.charAt(3)=='E') {//en passant
+			int start, end;
+			if (move.charAt(2)=='W') { // white move
+				start = Long.numberOfTrailingZeros(moves.fileMasks[move.charAt(0)-'0'] & moves.rankMasks[3]);
+				end  = Long.numberOfTrailingZeros(moves.fileMasks[move.charAt(1)-'0'] & moves.rankMasks[2]);
+				board &= ~(moves.fileMasks[move.charAt(1)-'0'] & moves.rankMasks[3]);
+			} else { // black move
+				start = Long.numberOfTrailingZeros(moves.fileMasks[move.charAt(0)-'0'] & moves.rankMasks[4]);
+				end = Long.numberOfTrailingZeros(moves.fileMasks[move.charAt(1)-'0'] & moves.rankMasks[5]);
+				board &= ~(moves.fileMasks[move.charAt(1)-'0'] & moves.rankMasks[4]);
+			}
+			if (((board >>> start) & 1) == 1) { // check that starting location exists on board
+				board &= ~(1L << start); // remove piece from starting location
+				board |= (1L << end); // add piece to destination
+			}
+		} else { // catch errors in move list
+			System.out.print("ERROR: Invalid move type");
+		}
+		return board;
 	}
+
+	public long makeMoveEP(long board, String move) {
+		if (Character.isDigit(move.charAt(3))) { // check move type
+			int start = (Character.getNumericValue(move.charAt(0)) * 8) // multiply by to get proper bit index
+					+ (Character.getNumericValue(move.charAt(1)));
+			if ((Math.abs(move.charAt(0) - move.charAt(2)) == 2)
+					&& (((board >>> start) & 1) == 1)) { // move is a pawn double push
+				return moves.fileMasks[move.charAt(1)-'0']; // return mask for file where en passant is possible
+			}
+		}
+		return 0;
+	}
+
+	public long makeMoveCastle(long rBoard, long kBoard, String move, char type) {
+		int start = (Character.getNumericValue(move.charAt(0)) * 8) // multiply by to get proper bit index
+				+ (Character.getNumericValue(move.charAt(1)));
+		if ((((kBoard >>> start) & 1) == 1) // ensure king is still in starting position
+				&& (("0402".equals(move))  // black, queen side castle
+						|| ("0406".equals(move)) // black, king side castle
+						|| ("7472".equals(move)) // white, queen side
+						|| ("7476".equals(move)))) { // white, king side
+			if (type == 'R') { // white move
+				switch (move) {
+				case "7472": // queen side
+					rBoard &= ~(1L << 56); // remove rook from starting location
+					rBoard |= (1L << (56 + 3)); // add rook to destination
+					break;
+
+				case "7476": // king side
+					rBoard &= ~(1L << 63); // remove rook from starting location
+					rBoard |= (1L << (63 - 2)); // add rook to destination
+					break;
+				}
+			} else { // black move
+				switch (move) {
+				case "0402": // queen side
+					rBoard &= ~(1L << 0); // remove rook from starting location
+					rBoard |= (1L << (0 + 3)); // add rook to destination
+					break;
+				case "0406": // king side
+					rBoard &= ~(1L << 7); // remove rook from starting location
+					rBoard |= (1L << (7 - 2)); // add rook to destination
+					break;
+				}
+			}
+		}
+		return rBoard;
+	}
+
 }

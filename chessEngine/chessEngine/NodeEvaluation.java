@@ -1,20 +1,12 @@
 package chessEngine;
 
 /*
- * Receives:
- * 		boardState:		bitboard (Long)
- * 		
- * Returns:
- * 		boardEvaluation:	score (int)
  * 
  * Evaluations:
- * 		rateMaterial	sum(# of pieces player has on board)
- * 		rateMovability	sum(# of moves possible for each piece)
- * 		ratePositional	sum(each pieces positional score) 
- * 		rateAttack		-sum(# of pieces under attack)
- * 
- * Players own values are added, Opponents values are subtracted
- * 	bitboard needs to be reversed to calculate opponents positional ratings
+ * 		material	sum(# of pieces player has on board)
+ * 		moves	sum(# of moves possible for each piece)
+ * 		position	sum(each pieces positional score) 
+ * 		attack		-sum(# of pieces under attack)
  * 
  * Node evaluation matrices are from http://chessprogramming.wikispaces.com/Simplified+evaluation+function
  * 
@@ -152,8 +144,8 @@ public class NodeEvaluation {
 		return moveCnt;
 	}
 	
+	// takes bitboard and string for piece type
 	public int position(long bitboard, String type) {
-		// takes bitboard and string for piece type
 		int score = 0;
 		int[] pcValues = null;
 		
