@@ -19,26 +19,26 @@ public class BoardGen {
 	long bP = 0L, bN = 0L, bB = 0L, bR = 0L, bQ = 0L, bK = 0L; // black
 
 	public void initStdGame() {
-		// TODO: test initStdGame
+		// TODO: don't think this is necessary, board state gets passed from UI
 		// initiates a standard board setup for a new game
 		// 
 		
 		String board[][] = {
-				{"r","n","b","q","k","b","n","r"},
-				{"p","p","p","p","p","p","p","p"},
-				{" "," "," "," "," "," "," "," "},
-				{" "," "," "," "," "," "," "," "},
-				{" "," "," "," "," "," "," "," "},
-				{" "," "," "," "," "," "," "," "},
 				{"P","P","P","P","P","P","P","P"},
-				{"R","N","B","Q","K","B","N","R"}
+				{"R","N","B","Q","K","B","N","R"},
+				{" "," "," "," "," "," "," "," "},
+				{" "," "," "," "," "," "," "," "},
+				{" "," "," "," "," "," "," "," "},
+				{" "," "," "," "," "," "," "," "},
+				{"p","p","p","p","p","p","p","p"},
+				{"r","n","b","q","k","b","n","r"}
 		};
 		
 		arrayToBB(board);
 		
 	} // initStdGame()
 	
-	public void initUserBoard(String board[][]) {
+	public String initBoard(String fenString) {
 		// TODO: update initUserBoard to take FEN string
 		// TODO: test initUserBoard
 		// initiates a board setup based on user input
@@ -53,40 +53,40 @@ public class BoardGen {
 			bitboard = "0000000000000000000000000000000000000000000000000000000000000000"; // 64bit string
 			bitboard = bitboard.substring(i+1) + "1" + bitboard.substring(0, i);
 			switch (board[i/8][i%8]) { // look at chars at each position in board
-			case "r": // black rooks
+			case "R": // black rooks
 				bR += parseString(bitboard);
 				break;
-			case "n": // black knights
+			case "N": // black knights
 				bN += parseString(bitboard);
 				break;
-			case "b": // black bishops
+			case "B": // black bishops
 				bB += parseString(bitboard);
 				break;
-			case "q": // black queens
+			case "Q": // black queens
 				bQ += parseString(bitboard);
 				break;
-			case "k": // black king
+			case "K": // black king
 				bK += parseString(bitboard);
 				break;
-			case "p": // black pawns
+			case "P": // black pawns
 				bP += parseString(bitboard);
 				break;
-			case "R": // white rooks
+			case "r": // white rooks
 				wR += parseString(bitboard);
 				break;
-			case "N": // white knights
+			case "n": // white knights
 				wN += parseString(bitboard);
 				break;
-			case "B": // white bishops
+			case "b": // white bishops
 				wB += parseString(bitboard);
 				break;
-			case "Q": // white queens
+			case "q": // white queens
 				wQ += parseString(bitboard);
 				break;
-			case "K": // white king
+			case "k": // white king
 				wK += parseString(bitboard);
 				break;
-			case "P": // white pawns
+			case "p": // white pawns
 				wP += parseString(bitboard);
 				break;
 			default:

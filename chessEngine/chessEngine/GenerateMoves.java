@@ -2,6 +2,7 @@ package chessEngine;
 
 //TODO re-analyze pawn movements, might be able to make generic function to handle while loops
 //TODO castling, requires booleans which are updated by move maker when castling is no longer poss
+//TODO simplify, is it necessary to create moveList?
 
 /*
  * Class generates all possible moves for a player. Bitboard masks are used to
@@ -169,7 +170,7 @@ public class GenerateMoves {
              moveList += (index % 8) + (index % 8) + "QP" // promotion to queen
             		 + (index % 8) + (index % 8) + "RP" // promotion to rook
             		 + (index % 8) + (index % 8) + "BP" // promotion to bishop
-            		 + (index % 8) + (index  %8) + "NP"; // no promotion
+            		 + (index % 8) + (index % 8) + "NP"; // no promotion
              pawnMoves &= ~nextMove; // remove added move from list of remaining possibilities
         	 nextMove = pawnMoves & ~(pawnMoves - 1); // remove all moves but one
          }

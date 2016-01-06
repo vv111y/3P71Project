@@ -2,3 +2,7 @@
 /BoardGen.class
 /GenerateMoves.class
 /MakeMoves.class
+/SearchTree.class
+/NodeEvaluation.class
+/Node.class
+/BoardNode.class
