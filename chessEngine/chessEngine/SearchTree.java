@@ -53,7 +53,7 @@ public class SearchTree {
 		int value; 
 		nextNode.setScore(alpha);
 		while (!nextNode.moves.moveList.isEmpty()) {
-			value = nextNode.setScore(Math.max(nextNode.getScore(), minValue(new BoardNode(makeMove(nextNode), depth - 1, alpha, beta))));
+			value = nextNode.setScore(Math.max(nextNode.getScore(), minValue(new BoardNode(makeMove(nextNode), depth + 1, alpha, beta))));
 			if (value >= beta) {
 				return value;
 			}
@@ -69,7 +69,7 @@ public class SearchTree {
 		int value; 
 		nextNode.setScore(beta);
 		while (!nextNode.moves.moveList.isEmpty()) {
-			value = nextNode.setScore(Math.min(nextNode.getScore(), maxValue(new BoardNode(makeMove(nextNode), depth - 1, alpha, beta))));
+			value = nextNode.setScore(Math.min(nextNode.getScore(), maxValue(new BoardNode(makeMove(nextNode), depth + 1, alpha, beta))));
 			if (value <= alpha) {
 				return value;
 			}
@@ -89,6 +89,13 @@ public class SearchTree {
 		String piece = newBoard[nextMove.charAt(0)][nextMove.charAt(1)];
 		newBoard[nextMove.charAt(0)][nextMove.charAt(1)] = " ";
 		newBoard[nextMove.charAt(2)][nextMove.charAt(3)] = "piece";
+		
+		if (currentNode.game.max = "W") {
+			currentNode.game.max = "B"
+		} else {
+			currentNode.game.max = "W"
+		}
+			
 		return newBoard;
 	}
 
