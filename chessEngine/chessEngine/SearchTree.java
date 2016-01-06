@@ -15,6 +15,7 @@ import java.util.LinkedList;
 public class SearchTree {
 	
 	int ply;
+	boolean stopSearch;
 	BoardNode root;
 	
 	/*
@@ -37,7 +38,7 @@ public class SearchTree {
 		LinkedList<BoardNode> moveList = new LinkedList<>(); // maintain list of nodes off root
 		int bestScore = 0;
 		
-		while (!root.moves.moveList.isEmpty()) { // create new nodes with moves from moveList
+		while (!root.moves.moveList.isEmpty() && !stopSearch) { // create new nodes with moves from moveList
 			int depth = 0; // root node is depth 0
 			BoardNode newNode = new BoardNode(root.game); // create copy of root node
 			String nextMove = newNode.moves.moveList.remove(); // remove move to make node
