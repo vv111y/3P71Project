@@ -54,7 +54,6 @@ class Thinker implements Runnable {
 		
 		// New search tree
 		SearchTree thisSearch = new SearchTree(this.currentGame);
-		Thread.c
 		
 		// once built go in wait & notify thinker
 		//this.notifyAll();

@@ -3,7 +3,7 @@ package chessEngine;
 
 /*
  * BoardNode holds all informtion regarding a single game state.
- * It is able to create its own moveList, children, and evaluate its
+ * It is able to create its own moveList and evaluate its
  * own heuristic score.
  */
 
@@ -20,7 +20,7 @@ public class BoardNode {
 	NodeEvaluation eval;
 	
 	String				moveList;			// moves that can be made from current state
-	String 				bestMove; 			// best move (x1y1x2y2)
+	String 				moveMade; 			// move made (x1y1x2y2)
 	long				unsafeMoves;		// board for all unsafe moves
 	int 				score; 				// evaluation of board
 	int 				alpha, beta; 		// search bounds for board
@@ -34,38 +34,7 @@ public class BoardNode {
 		game = g;
 		arrayToBB(game.currentBoard);
 		moves = new MoveList(); // create new moveList object
-
-		switch (game.max) {
-		case "W":
-			moveList = moves.whiteMoves(wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK, game.wSCastle, game.wLCastle);
-			break;
-		case "B":
-			moveList = moves.blackMoves(wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK, game.bSCastle, game.bLCastle);
-			break;
-		default:
-			// TODO THROW ERROR
-			break;
-		}
-
-	}
-	
-	public BoardNode(GameState g, String[][] newBoard) { // set start board for node
-		game = g;
-		arrayToBB(newBoard);
-		moves = new MoveList(); // create new moveList object
-
-		switch (game.max) {
-		case "W":
-			moveList = moves.whiteMoves(wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK, game.wSCastle, game.wLCastle);
-			break;
-		case "B":
-			moveList = moves.blackMoves(wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK, game.bSCastle, game.bLCastle);
-			break;
-		default:
-			// TODO THROW ERROR
-			break;
-		}
-
+		createMoves();
 	}
 
 	/*
@@ -133,17 +102,13 @@ public class BoardNode {
 		}
 	}
 	
-	/*
-	 * Methods to evaluate node
-	 */
-	
-	public int scoreBoard() {
+	public void createMoves() {
 		switch (game.max) {
 		case "W":
-			score = scoreWhite() - scoreBlack();
+			moves.whiteMoves(wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK, game.wSCastle, game.wLCastle);
 			break;
 		case "B":
-			score = scoreBlack() - scoreWhite();
+			moves.blackMoves(wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK, game.bSCastle, game.bLCastle);
 			break;
 		default:
 			// TODO THROW ERROR
@@ -151,58 +116,84 @@ public class BoardNode {
 		}
 	}
 	
+	/*
+	 * Methods to evaluate node
+	 */
+	
+	public int scoreBoard() {
+		switch (game.max) {
+		case "W":
+			score = scoreWhite() - scoreBlack() + moves.moveList.size();
+			break;
+		case "B":
+			score = scoreBlack() - scoreWhite() + moves.moveList.size();
+			break;
+		default:
+			// TODO THROW ERROR
+			break;
+		}
+		return score;
+	}
+	
 	public int scoreWhite() {
-		int score = 0;
+		int playerScore = 0;
+		int material;
 		
 		// calculate material value for each piece type
-		score += eval.material(wP, "P");
-		score += eval.material(wR, "R");
-		score += eval.material(wN, "N");
-		score += eval.material(wB, "B");
-		score += eval.material(wQ, "Q");
+		playerScore += eval.material(wP, "P");
+		playerScore += eval.material(wR, "R");
+		playerScore += eval.material(wN, "N");
+		playerScore += eval.material(wB, "B");
+		playerScore += eval.material(wQ, "Q");
+		
+		// copy material score for use in position scoring for king
+		material = playerScore;
 		
 		// calculate positional value of each piece type
-		score += eval.position(wP, "P");
-		score += eval.position(wR, "R");
-		score += eval.position(wN, "N");
-		score += eval.position(wB, "B");
-		score += eval.position(wQ, "Q");
-		score += eval.position(wK, "K");
-		
-		// calculate number of moves possible from current position
-		score += eval.moves(moveList);
+		// boolean flag for reversing bits to score black positions
+		playerScore += eval.position(wP, "P", material, false);
+		playerScore += eval.position(wR, "R", material, false);
+		playerScore += eval.position(wN, "N", material, false);
+		playerScore += eval.position(wB, "B", material, false);
+		playerScore += eval.position(wQ, "Q", material, false);
+		playerScore += eval.position(wK, "K", material, false);
 		
 		// calculate penalty for pieces in danger
 		unsafeMoves = moves.unsafe(false, bP, bN, bB, bR, bQ, bK);
 		unsafeMoves &= (bP | bN | bB | bR | bQ | bK);
-		score -= eval.attacks(unsafeMoves);
+		playerScore -= eval.attacks(unsafeMoves);
+		
+		return playerScore;
 	}
 	
 	public int scoreBlack() {
-		int score = 0;
+		int playerScore = 0;
+		int material;
 		
 		// calculate material value for each piece type
-		score += eval.material(bP, "P");
-		score += eval.material(bR, "R");
-		score += eval.material(bN, "N");
-		score += eval.material(bB, "B");
-		score += eval.material(bQ, "Q");
+		playerScore += eval.material(bP, "P");
+		playerScore += eval.material(bR, "R");
+		playerScore += eval.material(bN, "N");
+		playerScore += eval.material(bB, "B");
+		playerScore += eval.material(bQ, "Q");
+		
+		// copy material score for use in position scoring for king
+		material = playerScore;
 		
 		// calculate positional value of each piece type
-		score += eval.position(bP, "P");
-		score += eval.position(bR, "R");
-		score += eval.position(bN, "N");
-		score += eval.position(bB, "B");
-		score += eval.position(bQ, "Q");
-		score += eval.position(bK, "K");
-		
-		// calculate number of moves possible from current position
-		score += eval.moves(moveList);
+		playerScore += eval.position(bP, "P", material, true);
+		playerScore += eval.position(bR, "R", material, true);
+		playerScore += eval.position(bN, "N", material, true);
+		playerScore += eval.position(bB, "B", material, true);
+		playerScore += eval.position(bQ, "Q", material, true);
+		playerScore += eval.position(bK, "K", material, true);
 		
 		// calculate penalty for pieces in danger
 		unsafeMoves = moves.unsafe(true, wP, wN, wB, wR, wQ, wK);
 		unsafeMoves &= (bP | bN | bB | bR | bQ | bK);
-		score -= eval.attacks(unsafeMoves);
+		playerScore -= eval.attacks(unsafeMoves);
+		
+		return playerScore;
 	}
 	
 	
@@ -211,12 +202,10 @@ public class BoardNode {
 	/*
 	 * Setters
 	 */
-	public void setBest(long bitboard) { // set best move for starting board
-		bestMove = bitboard;
-	}
 
-	public void setScore(int eval) { // set evaluation score for start board
+	public int setScore(int eval) { // set evaluation score for start board
 		score = eval;
+		return score;
 	}
 
 	public void setBounds(int a, int b) { // set pruning bounds for start board
@@ -228,9 +217,7 @@ public class BoardNode {
 	/*
 	 * Getters
 	 */
-	public long getBest() { // get best move for starting board
-		return bestMove;
-	}
+
 
 	public int getScore() { // get evaluation score for start board
 		return score;
