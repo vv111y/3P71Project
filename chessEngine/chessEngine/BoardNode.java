@@ -153,6 +153,7 @@ public class BoardNode {
 	
 	public int scoreWhite() {
 		int score = 0;
+		int material;
 		
 		// calculate material value for each piece type
 		score += eval.material(wP, "P");
@@ -161,13 +162,17 @@ public class BoardNode {
 		score += eval.material(wB, "B");
 		score += eval.material(wQ, "Q");
 		
+		// copy material score for use in position scoring for king
+		material = score;
+		
 		// calculate positional value of each piece type
-		score += eval.position(wP, "P");
-		score += eval.position(wR, "R");
-		score += eval.position(wN, "N");
-		score += eval.position(wB, "B");
-		score += eval.position(wQ, "Q");
-		score += eval.position(wK, "K");
+		// boolean flag for reversing bits to score black positions
+		score += eval.position(wP, "P", material, false);
+		score += eval.position(wR, "R", material, false);
+		score += eval.position(wN, "N", material, false);
+		score += eval.position(wB, "B", material, false);
+		score += eval.position(wQ, "Q", material, false);
+		score += eval.position(wK, "K", material, false);
 		
 		// calculate number of moves possible from current position
 		score += eval.moves(moveList);
@@ -180,6 +185,7 @@ public class BoardNode {
 	
 	public int scoreBlack() {
 		int score = 0;
+		int material;
 		
 		// calculate material value for each piece type
 		score += eval.material(bP, "P");
@@ -188,13 +194,16 @@ public class BoardNode {
 		score += eval.material(bB, "B");
 		score += eval.material(bQ, "Q");
 		
+		// copy material score for use in position scoring for king
+		material = score;
+		
 		// calculate positional value of each piece type
-		score += eval.position(bP, "P");
-		score += eval.position(bR, "R");
-		score += eval.position(bN, "N");
-		score += eval.position(bB, "B");
-		score += eval.position(bQ, "Q");
-		score += eval.position(bK, "K");
+		score += eval.position(bP, "P", material, true);
+		score += eval.position(bR, "R", material, true);
+		score += eval.position(bN, "N", material, true);
+		score += eval.position(bB, "B", material, true);
+		score += eval.position(bQ, "Q", material, true);
+		score += eval.position(bK, "K", material, true);
 		
 		// calculate number of moves possible from current position
 		score += eval.moves(moveList);

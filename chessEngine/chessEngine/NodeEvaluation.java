@@ -145,9 +145,12 @@ public class NodeEvaluation {
 	}
 	
 	// takes bitboard and string for piece type
-	public int position(long bitboard, String type) {
+	public int position(long bitboard, String type, int material, boolean reverse) {
 		int score = 0;
 		int[] pcValues = null;
+		
+		if (reverse)
+			Long.reverse(bitboard);
 		
 		switch (type) {
 		case "P": // pawn
@@ -166,7 +169,12 @@ public class NodeEvaluation {
 			pcValues = queenScores;
 			break;
 		case "K":
-			// TODO how to determine mid from end game?
+			// if player has less than 1400 pts of material then shift
+			if (material < 1400) {
+				pcValues = kingEndGame;
+			} else {
+				pcValues = kingMidGame;
+			}
 		}
 		
 		for (int i = 0; i < 64; i++) {
