@@ -48,6 +48,25 @@ public class BoardNode {
 		}
 
 	}
+	
+	public BoardNode(GameState g, String[][] newBoard) { // set start board for node
+		game = g;
+		arrayToBB(newBoard);
+		moves = new MoveList(); // create new moveList object
+
+		switch (game.max) {
+		case "W":
+			moveList = moves.whiteMoves(wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK, game.wSCastle, game.wLCastle);
+			break;
+		case "B":
+			moveList = moves.blackMoves(wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK, game.bSCastle, game.bLCastle);
+			break;
+		default:
+			// TODO THROW ERROR
+			break;
+		}
+
+	}
 
 	/*
 	 * Methods to initialize node
@@ -118,7 +137,7 @@ public class BoardNode {
 	 * Methods to evaluate node
 	 */
 	
-	public void scoreBoard() {
+	public int scoreBoard() {
 		switch (game.max) {
 		case "W":
 			score = scoreWhite() - scoreBlack();
