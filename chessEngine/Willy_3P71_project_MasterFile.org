@@ -1,6 +1,6 @@
 3P71 PROJECT MASTER
 
-TODO
+* TODO
 	
 	email for what goes in root node
 		create root node
@@ -58,7 +58,7 @@ TODO
 			parse rest of line
 
 
-DONE
+* DONE
 	UCI commands
 		go
 			parse rest of line 
@@ -103,12 +103,30 @@ DONE
 		terminate should be ok
 		system.out - does it already
 
+	Git/ team synchronize - learn, shared todo list
 	breakdown prob,
 		names, interface
 		breakdown jobs
 			setup deadlines
+	email justin/prof re *Report* - what's in it, etc
 
-DESIGN
+* Required
+	all the rules of chess
+	features:
+		GUI
+		allowed moves
+		timer
+		check status
+		Human vs Human mode, Human vs computer mode
+		Ply can be set 1-4 (no bonus for over 4, but must go that high)
+	multi-threaded or other optimizations some bonus, not much
+	Report (high mark value**)
+		heuristic(s) used 
+			ie pieces count of whites, blacks. not a good one
+			ie better assign # values to pieces, king is max#
+			look online
+
+* DESIGN
 
 	ACTIONS
 		Game Events
@@ -143,7 +161,7 @@ DESIGN
 			stop
 
 
-NOTES
+* NOTES
 	Rank = row, File = column
 	UCI
 		use java scanner for input 
@@ -166,7 +184,7 @@ NOTES
 		AC2 example from logicCrazy
 
 -------
-logic crazy adv
+* logic crazy adv
 	bitboard
 	iterative deepening
 	alpha-beta
@@ -180,7 +198,7 @@ logic crazy adv
 
 
 ----------
-Required
+* Required
 
 system requirements are as follows:
 	The program should respect the rules of chess, for example,
@@ -201,7 +219,7 @@ system requirements are as follows:
 
 	------
 
-TUT Nov20
+* TUT Nov20
 	CHESS PROJECT
 
 	include experiment protocols (same what I did in asgn2 parameter section)
@@ -218,10 +236,57 @@ TUT Nov20
 			condition if in check
 			condition if can do special moves
 
-LEC Oct26,28
+* LEC Oct26,28
+	Games (Adverserial Search, also PROJECT)
+		heuristics definitely needed since search space so big in most games
+
+		pseudo code slide - NB* , refer to it. Project will work perfectly if you do this slide.
+
+		alpha-beta pruning (see slide examples)
+			you are always picking best move for yourself. don't need to expand moves you will not make
+
+			assume opponent will make best, don't expand ones he will do worse 
+
+			pseudo algo slide : wrapper fn first, calls max fn, then 
+				max fn calls min, then min calls max, ... they call each other
+
+			global ply count is tracked within this
+			'perfect ordering' function of rules of chess, otherwise ie. random
+
+	LEC11 Oct28-15 CONT
+		minimax search resource limits
+		SOL
+			cut off search early eg. depth limited
+			heuristic eval fn (use EVAL instead of UTILITY)
+
+		CUTOFF
+			select 
+			horizon effect
+
+		eval fn slide - [BONUS][not recommended, be creative and make something better], easy but... 
+			linear weighted sum of features one
+
+			checkmate - harder to handle - flag allowed moves when in check or going into check
+
+		[BONUS how innovative is heuristic fn is a big chunk of marks]
+			if your fn is doing *consistently* worse than niave weight fn, will lose marks
+			but occasional dumb lossess ok
+
+		howto eval your AI? play games with it. could try playing someone elses AI
+		[Get basic minimax functionality first]
+		[look online for info on implement] [no GUI, not much marks] [AI should beat you most of the time]
+
+		GAMES WITH CHANCE
+			chance nodes - don't know outcomes
+			can use uniform distr when no info
+			called expectiminimax
+			search complexity much higher now. ply limited to about 2
+			often good to not even use minimax in these cases
+
+		talks of history of AI in games and current situation : Go is current game challenge, hard problem
 
 ----------
-REPORT
+* REPORT
 	BODY
 		Computer Opponent
 			heuristics used
@@ -239,7 +304,7 @@ REPORT
 	REFERENCES
 		Laws of Chess starting after July 1, 2014 https://www.fide.com/component/handbook/?id=171&view=article
 
-ARCHIVE
+* ARCHIVE
 	TODO
 		build engine
 		bitboards
